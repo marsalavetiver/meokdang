@@ -14,10 +14,10 @@
   var VET_SEARCH_URL = "https://map.naver.com/p/search/" + encodeURIComponent("24시 동물병원");
 
   var VERDICT = {
-    ok:    { label: "줘도 돼요",        lead: "건강한 아이에게는 괜찮다고 알려져 있어요." },
-    cond:  { label: "조건 지키면 돼요", lead: "아래 조건을 지키면 괜찮다고 알려져 있어요." },
-    warn:  { label: "안 주는 게 좋아요", lead: "조금은 괜찮을 수 있지만, 일부러 주는 건 권하지 않아요." },
-    no:    { label: "절대 안 돼요",     lead: "조금만 먹어도 위험할 수 있어요. 아이 손이 닿지 않는 곳에 두어 주세요." },
+    ok:    { label: "괜찮아요",          lead: "간식으로 좋아요" },
+    cond:  { label: "이렇게 주면 돼요",  lead: "이렇게만 주세요" },
+    warn:  { label: "안 주는 게 좋아요", lead: "일부러 주진 마세요" },
+    no:    { label: "절대 안 돼요",      lead: "조금만 먹어도 위험해요" },
     mixed: { label: "상태별로 달라요",  lead: "" }
   };
   var RANK = { no: 0, warn: 1, mixed: 2, cond: 3, ok: 4 };
@@ -175,8 +175,13 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  // 문장마다 줄을 바꿔 읽기 쉽게 한다
+  function lines(text) {
+    return esc(text).split(/(?<=[.!?,])\s+(?=\S)/).map(function (t) { return t.replace(/,$/, ""); }).join("<br>");
+  }
   function badge(v, text) { return '<span class="badge ' + v + '">' + esc(text || VERDICT[v].label) + "</span>"; }
   function chev() { return '<svg class="chev" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+  function celine(cls) { return '<img class="celine ' + (cls || "") + '" src="assets/celine.png" alt="" width="218" height="280">'; }
   function dogSVG(cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 120 120" aria-hidden="true">' +
       '<circle cx="60" cy="64" r="52" fill="#fff1e6"/>' +
@@ -197,8 +202,8 @@
   function searchIcon() { return '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="#6b7684" stroke-width="2"/><path d="m13.5 13.5 4 4" stroke="#6b7684" stroke-width="2" stroke-linecap="round"/></svg>'; }
   function backIcon() { return '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="#191f28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
 
-  function urgentLink(sub) {
-    return '<a class="urgent-link" href="#/ate"><span class="u"><b>이미 먹은 게 있어요</b><span>' + esc(sub) + "</span></span>" + chev() + "</a>";
+  function urgentLink() {
+    return '<a class="ate-row" href="#/ate"><span><span class="ico" aria-hidden="true">!</span><b>먹으면 안 되는 걸 먹었나요?</b></span>' + chev() + "</a>";
   }
 
   function header(opts) {
@@ -207,9 +212,9 @@
     var left = opts.back
       ? '<button class="icon-btn" data-act="back" aria-label="뒤로">' + backIcon() + "</button>"
       : "";
-    var logo = '<a class="logo" href="#/home" aria-label="먹어도 댕? 홈">' + pawSVG() + "<span>먹어도 댕?</span></a>";
+    var logo = '<a class="logo" href="#/home" aria-label="먹어도 댕? 홈">먹어도 댕?</a>';
     var chip = p
-      ? '<button class="profile-chip" data-act="profile" aria-label="아이 정보 바꾸기: ' + esc(dogName(p)) + '"><span class="dot">' + pawSVG() + "</span>" + esc(dogName(p)) + (p.weight ? " · " + p.weight + "kg" : "") + "</button>"
+      ? '<button class="profile-chip" data-act="profile" aria-label="아이 정보 바꾸기: ' + esc(dogName(p)) + '"><img class="face" src="assets/celine-face.png" alt="">' + esc(dogName(p)) + (p.weight ? " · " + p.weight + "kg" : "") + "</button>"
       : '<button class="profile-chip empty" data-act="profile">아이 정보 넣기</button>';
     document.getElementById("top").innerHTML = opts.hidden ? "" : left + logo + '<span class="spacer"></span>' + chip;
   }
@@ -251,13 +256,13 @@
 
     render(
       '<section class="start-hero">' +
-        dogSVG("mark") +
+        celine("mark") +
         '<h1 class="st5 b">' + (editing ? "아이 정보를 바꿀게요" : "오늘 누구의 음식을<br>확인할까요?") + "</h1>" +
-        '<p class="t6 muted">이름과 몸무게를 알려주시면 아이 몸에 맞춰 하루 최대량을 알려드려요. 정보는 이 기기에만 저장돼요.</p>' +
-      "</section>" +
+        '<p class="t6 muted">몸무게에 맞춰 하루 최대량을 알려드려요. 정보는 이 기기에만 저장돼요.</p>' +
+      "</section>" + urgentLink() +
       '<form id="start-form" novalidate>' +
         '<div class="field"><label class="label" for="f-name">아이 이름</label>' +
-          '<div class="input"><input id="f-name" maxlength="10" autocomplete="off" placeholder="예: 콩이" value="' + esc(d.name) + '"></div></div>' +
+          '<div class="input"><input id="f-name" maxlength="10" autocomplete="off" placeholder="예: 셀린" value="' + esc(d.name) + '"></div></div>' +
         '<div class="field"><span class="label">몸무게</span>' + weightField + "</div>" +
         '<div class="field"><span class="label">아픈 곳이 있나요?</span><span class="hint">여러 개 고를 수 있어요. 고르면 그 아이에게 맞춰 더 조심스럽게 알려드려요.</span>' +
           '<div class="chips" role="group" aria-label="아픈 곳">' + condChips + "</div></div>" +
@@ -267,8 +272,7 @@
             ? '<button class="btn btn-ghost" type="button" data-act="forget">이 기기에서 정보 지우기</button>'
             : '<button class="btn btn-ghost" type="button" data-act="browse">입력 없이 둘러볼게요</button>') +
         "</div>" +
-      "</form>" +
-      urgentLink("입력 없이 바로 할 일을 알려드려요"),
+      "</form>",
       { hidden: !editing, back: editing, title: "시작" }
     );
     validateStart();
@@ -293,15 +297,14 @@
         '<h1 class="st5 b">다시 오셨네요, 보호자님</h1>' +
         '<p class="t6 muted">오늘도 ' + esc(josa(dogName(p), "이", "")) + "의 음식을 확인할까요?</p>" +
       "</section>" +
-      '<div class="card saved" style="margin-top:24px"><div class="avatar">' + dogSVG() + "</div>" +
+      '<div class="card saved" style="margin-top:24px"><div class="avatar"><img src="assets/celine-face.png" alt=""></div>' +
         "<dl><dt>" + esc(dogName(p)) + "</dt><dd>" + esc(profileSummary(p)) + "</dd></dl></div>" +
       '<p class="t7 muted" style="margin:12px 4px 0">몸무게가 바뀌었다면 정보를 고쳐 주세요. 양이 달라져요.</p>' +
       '<div class="actions">' +
         '<button class="btn btn-primary" data-act="confirm">' + esc(josa(dogName(p), "이", "")) + " 맞아요</button>" +
         '<button class="btn btn-secondary" data-act="edit">정보 바꾸기</button>' +
         '<button class="btn btn-ghost" data-act="new">다른 아이예요</button>' +
-      "</div>" +
-      urgentLink("입력 없이 바로 할 일을 알려드려요"),
+      "</div>",
       { hidden: true, title: "시작" }
     );
   }
@@ -319,21 +322,20 @@
     var season = DATA.season.items.map(function (n) {
       var f = BY_NAME[n];
       var v = foodVerdict(f, p);
-      return '<a class="tile" href="#/food/' + f.id + '"><span class="name">' + esc(n) + "</span>" + badge(v, v === "warn" && p && personalize(f, bestState(f, p), p).by.length ? josa(dogName(p), "이는", "는") + " 피하기" : null) + "</a>";
+      return '<a class="chip" href="#/food/' + f.id + '"><span class="vdot ' + v + '" aria-hidden="true"></span>' + esc(n) + "</a>";
     }).join("");
 
     render(
-      '<section class="home-hero"><h1 class="st5 b">' + who + "<br>주고 싶은 음식이 있나요?</h1>" + dogSVG("dog") + "</section>" +
+      '<section class="home-hero"><h1 class="st5 b">' + who + "<br>주고 싶은 음식이<br>있나요?</h1>" + celine("dog") + "</section>" +
       '<form class="search" id="search-form" role="search">' +
         '<label class="input">' + searchIcon() + '<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="음식 이름을 써 주세요 (예: 황태)" aria-label="음식 검색"></label>' +
-      "</form>" +
+      "</form>" + urgentLink() +
       '<section class="section"><h2 class="section-title">많이 물어본 음식</h2>' +
         '<div class="chips scroll" role="group" aria-label="많이 물어본 음식">' + chips + "</div>" +
         '<div class="preview" id="preview" aria-live="polite">' + previewHTML(selectedChip) + "</div>" +
       "</section>" +
       '<section class="section"><h2 class="section-title">' + esc(DATA.season.title) + "</h2>" +
-        '<div class="season">' + season + "</div></section>" +
-      urgentLink("바로 할 일을 알려드려요"),
+        '<div class="chips">' + season + "</div></section>",
       { title: "홈" }
     );
   }
@@ -345,7 +347,7 @@
     var v = foodVerdict(f, p);
     return '<a class="card preview-card" href="#/food/' + f.id + '">' +
       '<div class="row"><span class="name">' + esc(f.name) + "</span>" + badge(v) + "</div>" +
-      "<p>" + esc(shortReason(f, p)) + "</p>" +
+      "<p>" + lines(shortReason(f, p)) + "</p>" +
       '<span class="more">자세히 보기</span></a>';
   }
 
@@ -355,11 +357,11 @@
     var list = search(q);
     var body;
     if (!list.length) {
-      body = '<div class="empty-state">' + dogSVG("mark") +
+      body = '<div class="empty-state">' + celine("mark") +
         '<h2 class="t5 b" style="margin:12px 0 0">찾는 음식이 아직 없나요?</h2>' +
         "<p>알려주시면 빨리 챙겨둘게요.<br>급하다면 수의사 선생님께 먼저 물어봐 주세요.</p>" +
         '<a class="btn btn-secondary" href="' + REQUEST_URL + '?title=' + encodeURIComponent("음식 추가 요청: " + q) + '" target="_blank" rel="noopener">이 음식 알려주기</a>' +
-        urgentLink("바로 할 일을 알려드려요") + "</div>";
+        urgentLink() + "</div>";
     } else {
       body = '<p class="t7 muted" style="margin:8px 0 0">' + list.length + "개를 찾았어요</p>" +
         '<ul class="result-list">' + list.map(function (f) {
@@ -379,21 +381,21 @@
   function amountBlock(state, p) {
     var a = state.amount;
     if (!a) return "";
-    if (!a.s) return '<div class="amount"><div class="k">하루 최대</div><div class="v">' + esc(a.raw) + "</div></div>";
+    if (!a.s) return '<div class="divider"></div><div class="amt-k">하루 최대</div><div class="amt-v">' + esc(a.raw) + "</div>";
     var band = bandOf(p);
-    var note = a.note ? '<div class="note">' + esc(a.note) + " 기준</div>" : "";
+    var note = a.note ? " (" + esc(a.note) + " 기준)" : "";
     if (band) {
       var basis = p.weight ? p.weight + "kg" : BANDS[band].label;
-      return '<div class="amount"><div class="k">' + esc(dogName(p)) + "(" + esc(basis) + ") 몸무게에는</div>" +
-        '<div class="v">하루 최대 ' + esc(a[band]) + "</div>" + note +
-        '<div class="bands" aria-label="크기별 하루 최대량">' + ["s", "m", "l"].map(function (k) {
-          return '<div class="' + (k === band ? "me" : "") + '"><div class="bn">' + BANDS[k].label + '</div><div class="bv st10 b">' + esc(a[k]) + "</div></div>";
-        }).join("") + "</div></div>";
+      return '<div class="divider"></div><div class="amt-k">' + esc(josa(dogName(p) + "(" + basis + ")", "은", "는")) + " 하루 최대</div>" +
+        '<div class="amt-v">' + esc(a[band]) + "</div>" +
+        '<div class="amt-bands">' + ["s", "m", "l"].map(function (k) {
+          return BANDS[k].label + " " + (k === band ? "<b>" + esc(a[k]) + "</b>" : esc(a[k]));
+        }).join(" · ") + note + "</div>";
     }
-    return '<div class="amount"><div class="k">크기별 하루 최대량</div>' +
+    return '<div class="divider"></div><div class="amt-k">크기별 하루 최대</div>' +
       '<div class="bands">' + ["s", "m", "l"].map(function (k) {
         return '<div><div class="bn">' + BANDS[k].label + '</div><div class="bv">' + esc(a[k]) + '</div><div class="bw">' + BANDS[k].range + "</div></div>";
-      }).join("") + "</div>" + note + "</div>";
+      }).join("") + "</div>" + (note ? '<div class="amt-bands">' + note.trim() + "</div>" : "");
   }
 
   function stateBlock(food, state, p, primary) {
@@ -405,23 +407,23 @@
       '<div class="state">' + badge(v, label) + '<span class="state-name">' + esc(state.state) + "</span></div>";
     if (downgraded) {
       var c = CONDITIONS[pv.by[0]];
-      html += '<p class="lead">' + esc(c.subject + " " + josa(dogName(p), "이에게는", "에게는")) + " 권하지 않아요.</p>" +
-        '<p class="why">' + esc(c.reason) + " 이 음식은 피하는 게 좋다고 알려져 있어요. 건강한 아이 기준 판정은 '" + VERDICT[state.verdict].label + "'예요.</p>";
+      html += '<p class="lead">' + esc(josa(dogName(p), "이는", "는")) + " 피해 주세요</p>" +
+        '<p class="why">' + esc(c.subject.replace("약한", "약하면") + " " + c.reason) + " 피하는 게 좋아요.<br>건강한 아이라면 '" + VERDICT[state.verdict].label + "'예요.</p>";
     } else {
       html += '<p class="lead">' + esc(VERDICT[v].lead) + "</p>";
-      if (state.caution) html += '<p class="why">' + esc(state.caution) + "</p>";
+      var why = (primary && SUMMARY[food.name] && v !== "cond") ? SUMMARY[food.name] : (state.caution || "");
+      if (v === "no") why = (why ? why.replace(/\.?$/, ".") + " " : "") + "아이 손이 닿지 않는 곳에 두어 주세요.";
+      if (why) html += '<p class="why">' + lines(why) + "</p>";
     }
     if (!downgraded && pv.by.length && (v === "warn" || v === "no")) {
       html += '<p class="personal"><b>' + esc(CONDITIONS[pv.by[0]].subject + " " + dogName(p)) + "</b>에게는 특히 더 조심해 주세요.</p>";
     }
     if (v === "ok" || v === "cond") {
       html += amountBlock(state, p);
-      html += '<dl class="how">' +
-        (state.prep ? "<dt>이렇게 주세요</dt><dd>" + esc(state.prep) + "</dd>" : "") +
-        "</dl>" +
-        '<p class="first-time">처음 먹는 음식이라면 절반만 주고, 다음 날 응가 상태를 살펴봐 주세요. 이상하면 바로 멈춰 주세요.</p>';
+      if (state.prep) html += '<div class="divider"></div><dl class="how"><dt>이렇게 주세요</dt><dd>' + esc(state.prep) + "</dd></dl>";
+      html += '<p class="first-time">처음이라면 절반만 주고, 다음 날 응가 상태를 살펴봐 주세요. 이상하면 바로 멈춰 주세요.</p>';
     } else if (state.prep && v === "warn") {
-      html += '<dl class="how"><dt>꼭 줘야 한다면</dt><dd>' + esc(state.prep) + "</dd></dl>";
+      html += '<div class="divider"></div><dl class="how"><dt>꼭 줘야 한다면</dt><dd>' + esc(state.prep) + "</dd></dl>";
     }
     if (v === "no") {
       html += '<a class="btn ' + (v === "no" ? "btn-danger" : "btn-secondary") + ' ate-btn" href="#/ate/' + food.id + '">이미 먹었어요</a>';
@@ -443,13 +445,13 @@
 
     var html = '<div class="food-head"><span class="cat">' + CATEGORY[food.category] + "</span>" +
       '<h1 class="t2 b">' + esc(food.name) + "</h1>" +
-      (food.states.length > 1 ? '<p class="t7 muted" style="margin:4px 0 0">부위와 조리 상태에 따라 판정이 달라요. ' + food.states.length + "가지로 나눠 알려드려요.</p>" : "") +
+      (food.states.length > 1 ? '<p class="t7 muted" style="margin:4px 0 0">상태별로 판정이 달라요</p>' : "") +
       "</div>";
 
     if (hits.length) {
       html += '<div class="vet-first"><strong>수의사 선생님 안내가 먼저예요</strong>' +
         esc(hits.map(function (c) { return CONDITIONS[c].subject; }).join(", ") + " " + josa(dogName(p), "이", "")) +
-        "라면, 아래 내용보다 다니는 병원의 식단 안내를 먼저 따라 주세요.</div>";
+        "라면<br>다니는 병원의 식단 안내를 먼저 따라 주세요.</div>";
     }
 
     html += stateBlock(food, states[0], p, true);
@@ -460,7 +462,7 @@
     }
 
     if (!p) {
-      html += '<a class="profile-cta" href="#/start/new">' + pawSVG().replace("<svg", '<svg width="28" height="28"') +
+      html += '<a class="profile-cta" href="#/start/new">' + '<img class="face" src="assets/celine-face.png" alt="" width="36" height="36">' +
         "<div><b>우리 아이 몸무게로 볼까요?</b><span>이름과 몸무게를 넣으면 아이에게 맞는 양만 보여드려요.</span></div>" +
         '<span class="go">넣기</span></a>';
     }
@@ -474,7 +476,7 @@
         if (key === "확인 필요") return "<li>국내 자료로 한 번 더 확인하고 있어요. 그래서 더 조심스럽게 판정했어요.</li>";
         return "<li>" + (url ? '<a href="' + url + '" target="_blank" rel="noopener">' + esc(s) + "</a>" : esc(s)) + "</li>";
       }).join("") + "</ul>" +
-      '<p class="check-note">두 곳 이상의 자료에서 확인했고, 자료가 엇갈리면 더 조심스러운 쪽으로 정했어요. 양은 권하는 양이 아니라 넘지 않아야 할 하루 최대치예요.</p>' +
+      '<p class="check-note">자료가 엇갈리면 더 조심스러운 쪽으로 정했어요. 양은 넘지 않아야 할 하루 최대치예요.</p>' +
       '<div class="row"><span>마지막 검토 ' + esc(DATA.reviewedAt.replace(/-/g, ".")) + "</span>" +
       '<a class="report" href="' + REPORT_URL + "?title=" + encodeURIComponent("정보 확인 요청: " + food.name) + '" target="_blank" rel="noopener">정보가 이상해요 →</a></div>' +
       "</section>";
@@ -515,7 +517,7 @@
   }
 
   function viewNotFound() {
-    render('<div class="empty-state">' + dogSVG("mark") + '<h1 class="t5 b">페이지를 찾지 못했어요</h1><p>주소가 바뀌었을 수 있어요.</p><a class="btn btn-primary" href="#/home">홈으로 가기</a></div>', { title: "없는 페이지" });
+    render('<div class="empty-state">' + celine("mark") + '<h1 class="t5 b">페이지를 찾지 못했어요</h1><p>주소가 바뀌었을 수 있어요.</p><a class="btn btn-primary" href="#/home">홈으로 가기</a></div>', { title: "없는 페이지" });
   }
 
   /* ---------- 라우팅 ---------- */
