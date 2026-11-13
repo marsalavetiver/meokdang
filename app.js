@@ -311,9 +311,9 @@
 
   /* ---------- 셀린이 표정 ---------- */
   // 표정 그림이 생기면 파일 이름만 바꾼다. null이면 셀린이 대신 금지 아이콘을 쓴다.
-  var MOOD = { ok: "assets/celine.png", cond: "assets/celine.png", warn: "assets/celine.png", mixed: "assets/celine.png", no: null, ate: null };
+  var MOOD = { ok: "assets/celine-ok.png", cond: "assets/celine-cond.png", warn: "assets/celine-warn.png", mixed: "assets/celine-cond.png", no: "assets/celine-no.png", ate: "assets/celine-warn.png" };
   function stageArt(v) {
-    if (MOOD[v]) return '<img class="stage-art" src="' + MOOD[v] + '" alt="" width="218" height="280">';
+    if (MOOD[v]) return '<img class="stage-art mood-' + v + '" src="' + MOOD[v] + '" alt="">';
     return '<span class="stop-icon" aria-hidden="true"><svg width="64" height="64" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="24" stroke="#fff" stroke-width="7"/><path d="M19 19 53 53" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg></span>';
   }
   function labelFor(food, state, p) {

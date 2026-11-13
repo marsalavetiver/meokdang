@@ -299,7 +299,7 @@ p, dd { text-wrap:pretty; }
 .stage { position:relative; margin-top:var(--space-2); height:228px; border-radius:32px; display:grid; place-items:center; overflow:hidden; }
 .stage.ok { background:var(--verdict-ok-bg); } .stage.cond { background:var(--verdict-cond-bg); } .stage.warn { background:var(--verdict-warn-bg); } .stage.no { background:var(--verdict-no-bg); } .stage.mixed { background:var(--verdict-mixed-bg); }
 .stage-food { position:absolute; left:14px; top:14px; max-width:calc(100% - 28px); background:var(--bg-surface); border-radius:var(--radius-pill); padding:6px 12px; font-size:13px; font-weight:700; box-shadow:var(--shadow-card); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.stage-art { width:140px; height:auto; margin-top:30px; }
+.stage-art { width:auto; height:170px; max-width:72%; margin-top:40px; object-fit:contain; }
 .stop-icon { width:124px; height:124px; border-radius:38px; background:var(--verdict-no); display:grid; place-items:center; margin-top:18px; box-shadow:0 10px 24px rgba(219,59,34,.3); }
 .verdict-text { text-align:center; padding:0 4px; }
 .v-title { margin:18px 0 0; font-size:32px; line-height:40px; font-weight:800; letter-spacing:-.02em; text-wrap:balance; }
