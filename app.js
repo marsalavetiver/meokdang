@@ -203,7 +203,7 @@
   function backIcon() { return '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="#191f28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
 
   function urgentLink() {
-    return '<a class="ate-row" href="#/ate"><span><span class="ico" aria-hidden="true">!</span><b>먹으면 안 되는 걸 먹었나요?</b></span>' + chev() + "</a>";
+    return '<a class="ate-row" href="#/ate"><span class="ico" aria-hidden="true">!</span><b>먹으면 안 되는 걸 먹었나요?</b>' + chev() + "</a>";
   }
 
   function header(opts) {
@@ -255,7 +255,7 @@
     }).join("") + '<button type="button" class="chip" data-cond="none" aria-pressed="' + (d.conditions.length === 0 && d.touchedCond ? "true" : "false") + '">없어요</button>';
 
     render(
-      '<section class="start-hero">' +
+      '<section class="start-hero hero-center">' +
         celine("mark") +
         '<h1 class="st5 b">' + (editing ? "아이 정보를 바꿀게요" : "오늘 누구의 음식을<br>확인할까요?") + "</h1>" +
         '<p class="t6 muted">몸무게에 맞춰 하루 최대량을 알려드려요. 정보는 이 기기에만 저장돼요.</p>' +
@@ -293,7 +293,7 @@
 
   function viewWelcomeBack(p) {
     render(
-      '<section class="start-hero">' +
+      '<section class="start-hero hero-center">' + celine("mark") +
         '<h1 class="st5 b">다시 오셨네요, 보호자님</h1>' +
         '<p class="t6 muted">오늘도 ' + esc(josa(dogName(p), "이", "")) + "의 음식을 확인할까요?</p>" +
       "</section>" +
@@ -309,46 +309,62 @@
     );
   }
 
+  /* ---------- 셀린이 표정 ---------- */
+  // 표정 그림이 생기면 파일 이름만 바꾼다. null이면 셀린이 대신 금지 아이콘을 쓴다.
+  var MOOD = { ok: "assets/celine.png", cond: "assets/celine.png", warn: "assets/celine.png", mixed: "assets/celine.png", no: null, ate: null };
+  function stageArt(v) {
+    if (MOOD[v]) return '<img class="stage-art" src="' + MOOD[v] + '" alt="" width="218" height="280">';
+    return '<span class="stop-icon" aria-hidden="true"><svg width="64" height="64" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="24" stroke="#fff" stroke-width="7"/><path d="M19 19 53 53" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg></span>';
+  }
+  function labelFor(food, state, p) {
+    var pv = personalize(food, state, p);
+    return pv.verdict !== state.verdict ? josa(dogName(p), "이는", "는") + " 피하기" : VERDICT[pv.verdict].label;
+  }
+
   /* ---------- 화면: 홈 ---------- */
   var selectedChip = null;
 
   function viewHome() {
     var p = activeProfile();
     var who = p ? esc(josa(dogName(p), "이에게", "에게")) : "우리 아이에게";
-    var chips = DATA.popular.map(function (n) {
+    var tiles = DATA.popular.slice(0, 9).map(function (n) {
       var f = BY_NAME[n];
-      return '<button class="chip" data-chip="' + f.id + '" aria-pressed="' + (selectedChip === f.id) + '"><span class="vdot ' + foodVerdict(f, p) + '" aria-hidden="true"></span>' + esc(n) + "</button>";
+      var v = foodVerdict(f, p);
+      var label = v === "mixed" ? VERDICT.mixed.label : labelFor(f, bestState(f, p), p);
+      return '<button class="tile t-' + v + '" data-chip="' + f.id + '" aria-pressed="' + (selectedChip === f.id) + '"><b>' + esc(n) + "</b><span>" + esc(label) + "</span></button>";
     }).join("");
     var season = DATA.season.items.map(function (n) {
       var f = BY_NAME[n];
       var v = foodVerdict(f, p);
-      return '<a class="chip" href="#/food/' + f.id + '"><span class="vdot ' + v + '" aria-hidden="true"></span>' + esc(n) + "</a>";
+      var label = v === "mixed" ? VERDICT.mixed.label : labelFor(f, bestState(f, p), p);
+      return '<a class="g-row link" href="#/food/' + f.id + '"><span class="bar ' + v + '"></span><span class="g-name">' + esc(n) + '</span><span class="g-val">' + esc(label) + "</span>" + chev() + "</a>";
     }).join("");
 
     render(
-      '<section class="home-hero"><h1 class="st5 b">' + who + "<br>주고 싶은 음식이<br>있나요?</h1>" + celine("dog") + "</section>" +
-      '<form class="search" id="search-form" role="search">' +
+      '<section class="hero-center">' + celine("hero-celine") +
+        '<h1 class="st5 b">' + who + " 주고 싶은<br>음식이 있나요?</h1></section>" +
+      '<form class="search pill-search" id="search-form" role="search">' +
         '<label class="input">' + searchIcon() + '<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="음식 이름을 써 주세요 (예: 황태)" aria-label="음식 검색"></label>' +
       "</form>" + urgentLink() +
       '<section class="section"><h2 class="section-title">많이 물어본 음식</h2>' +
-        '<div class="chips scroll" role="group" aria-label="많이 물어본 음식">' + chips + "</div>" +
+        '<div class="tiles" role="group" aria-label="많이 물어본 음식">' + tiles + "</div>" +
         '<div class="preview" id="preview" aria-live="polite">' + previewHTML(selectedChip) + "</div>" +
       "</section>" +
       '<section class="section"><h2 class="section-title">' + esc(DATA.season.title) + "</h2>" +
-        '<div class="chips">' + season + "</div></section>",
+        '<div class="group">' + season + "</div></section>",
       { title: "홈" }
     );
   }
 
   function previewHTML(id) {
-    if (!id) return '<p class="t7 muted" style="margin:4px 2px 0">음식을 누르면 여기에서 바로 알려드려요.</p>';
+    if (!id) return '<p class="t7 muted" style="margin:2px 2px 0">음식을 누르면 여기에서 바로 알려드려요.</p>';
     var f = BY_ID[id];
     var p = activeProfile();
     var v = foodVerdict(f, p);
     return '<a class="card preview-card" href="#/food/' + f.id + '">' +
-      '<div class="row"><span class="name">' + esc(f.name) + "</span>" + badge(v) + "</div>" +
+      '<div class="row"><span class="name">' + esc(f.name) + "</span>" + badge(v, v === "mixed" ? null : labelFor(f, bestState(f, p), p)) + "</div>" +
       "<p>" + lines(shortReason(f, p)) + "</p>" +
-      '<span class="more">자세히 보기</span></a>';
+      '<span class="more">자세히 보기 ›</span></a>';
   }
 
   /* ---------- 화면: 검색 결과 ---------- */
@@ -363,123 +379,115 @@
         '<a class="btn btn-secondary" href="' + REQUEST_URL + '?title=' + encodeURIComponent("음식 추가 요청: " + q) + '" target="_blank" rel="noopener">이 음식 알려주기</a>' +
         urgentLink() + "</div>";
     } else {
-      body = '<p class="t7 muted" style="margin:8px 0 0">' + list.length + "개를 찾았어요</p>" +
-        '<ul class="result-list">' + list.map(function (f) {
+      body = '<p class="t7 muted" style="margin:12px 4px 8px">' + list.length + "개를 찾았어요</p>" +
+        '<div class="group">' + list.map(function (f) {
           var v = foodVerdict(f, p);
-          return '<li><a href="#/food/' + f.id + '"><span class="txt"><span class="name">' + esc(f.name) + '</span><br><span class="sub">' + esc(f.states.map(function (s) { return s.state; }).join(" · ")) + "</span></span>" + badge(v) + chev() + "</a></li>";
-        }).join("") + "</ul>";
+          return '<a class="g-row link tall" href="#/food/' + f.id + '"><span class="bar ' + v + '"></span><span class="g-name">' + esc(f.name) +
+            '<small>' + esc(f.states.map(function (s) { return s.state; }).join(" · ")) + "</small></span>" +
+            badge(v, v === "mixed" ? null : labelFor(f, bestState(f, p), p)) + chev() + "</a>";
+        }).join("") + "</div>";
     }
     render(
-      '<div class="result-head"><form class="search" id="search-form" role="search" style="margin-top:0">' +
-        '<label class="input">' + searchIcon() + '<input id="q" type="search" enterkeyhint="search" autocomplete="off" value="' + esc(q) + '" aria-label="음식 검색"></label></form></div>' +
+      '<form class="search pill-search" id="search-form" role="search" style="margin-top:8px">' +
+        '<label class="input">' + searchIcon() + '<input id="q" type="search" enterkeyhint="search" autocomplete="off" value="' + esc(q) + '" aria-label="음식 검색"></label></form>' +
       body,
       { back: true, title: "‘" + q + "’ 검색" }
     );
   }
 
   /* ---------- 화면: 판정 카드 ---------- */
-  function amountBlock(state, p) {
-    var a = state.amount;
-    if (!a) return "";
-    if (!a.s) return '<div class="divider"></div><div class="amt-k">하루 최대</div><div class="amt-v">' + esc(a.raw) + "</div>";
-    var band = bandOf(p);
-    var note = a.note ? " (" + esc(a.note) + " 기준)" : "";
-    if (band) {
-      var basis = p.weight ? p.weight + "kg" : BANDS[band].label;
-      return '<div class="divider"></div><div class="amt-k">' + esc(josa(dogName(p) + "(" + basis + ")", "은", "는")) + " 하루 최대</div>" +
-        '<div class="amt-v">' + esc(a[band]) + "</div>" +
-        '<div class="amt-bands">' + ["s", "m", "l"].map(function (k) {
-          return BANDS[k].label + " " + (k === band ? "<b>" + esc(a[k]) + "</b>" : esc(a[k]));
-        }).join(" · ") + note + "</div>";
-    }
-    return '<div class="divider"></div><div class="amt-k">크기별 하루 최대</div>' +
-      '<div class="bands">' + ["s", "m", "l"].map(function (k) {
-        return '<div><div class="bn">' + BANDS[k].label + '</div><div class="bv">' + esc(a[k]) + '</div><div class="bw">' + BANDS[k].range + "</div></div>";
-      }).join("") + "</div>" + (note ? '<div class="amt-bands">' + note.trim() + "</div>" : "");
-  }
+  function row(k, v) { return '<div class="g-row"><span class="g-k">' + k + '</span><span class="g-big">' + v + "</span></div>"; }
+  function textRow(k, t) { return '<div class="g-row text"><div><small>' + k + "</small>" + t + "</div></div>"; }
 
-  function stateBlock(food, state, p, primary) {
-    var pv = personalize(food, state, p);
-    var v = pv.verdict;
+  function detailRows(food, state, p, pv) {
+    var v = pv.verdict, out = "";
     var downgraded = pv.verdict !== state.verdict;
-    var label = downgraded ? josa(dogName(p), "이는", "는") + " 피하기" : VERDICT[v].label;
-    var html = '<section class="verdict ' + v + '" aria-label="' + esc(state.state) + " 판정: " + esc(label) + '">' +
-      '<div class="state">' + badge(v, label) + '<span class="state-name">' + esc(state.state) + "</span></div>";
     if (downgraded) {
-      var c = CONDITIONS[pv.by[0]];
-      html += '<p class="lead">' + esc(josa(dogName(p), "이는", "는")) + " 피해 주세요</p>" +
-        '<p class="why">' + esc(c.subject.replace("약한", "약하면") + " " + c.reason) + " 피하는 게 좋아요.<br>건강한 아이라면 '" + VERDICT[state.verdict].label + "'예요.</p>";
-    } else {
-      html += '<p class="lead">' + esc(VERDICT[v].lead) + "</p>";
-      var why = (primary && SUMMARY[food.name] && v !== "cond") ? SUMMARY[food.name] : (state.caution || "");
-      if (v === "no") why = (why ? why.replace(/\.?$/, ".") + " " : "") + "아이 손이 닿지 않는 곳에 두어 주세요.";
-      if (why) html += '<p class="why">' + lines(why) + "</p>";
-    }
-    if (!downgraded && pv.by.length && (v === "warn" || v === "no")) {
-      html += '<p class="personal"><b>' + esc(CONDITIONS[pv.by[0]].subject + " " + dogName(p)) + "</b>에게는 특히 더 조심해 주세요.</p>";
+      out += textRow("건강한 아이라면", esc(VERDICT[state.verdict].label) + (state.prep ? " · " + esc(state.prep) : ""));
+      return out;
     }
     if (v === "ok" || v === "cond") {
-      html += amountBlock(state, p);
-      if (state.prep) html += '<div class="divider"></div><dl class="how"><dt>이렇게 주세요</dt><dd>' + esc(state.prep) + "</dd></dl>";
-      html += '<p class="first-time">처음이라면 절반만 주고, 다음 날 응가 상태를 살펴봐 주세요. 이상하면 바로 멈춰 주세요.</p>';
-    } else if (state.prep && v === "warn") {
-      html += '<div class="divider"></div><dl class="how"><dt>꼭 줘야 한다면</dt><dd>' + esc(state.prep) + "</dd></dl>";
+      var a = state.amount, band = bandOf(p);
+      if (a && a.s && band) {
+        out += row(esc(josa(dogName(p), "이", "")) + " 하루 최대<small>" + esc(p.weight ? p.weight + "kg" : BANDS[band].label) + " 기준" + (a.note ? " · " + esc(a.note) : "") + "</small>", esc(a[band]));
+      } else if (a && a.s) {
+        ["s", "m", "l"].forEach(function (k) { out += row(BANDS[k].label + " 하루 최대<small>" + BANDS[k].range + "</small>", esc(a[k])); });
+      } else if (a) {
+        out += row("하루 최대", esc(a.raw));
+      }
+      if (state.prep) out += textRow("이렇게 주세요", esc(state.prep));
+      out += textRow("처음이라면", "절반만 주고, 다음 날 응가 상태를 살펴봐 주세요.<br>이상하면 바로 멈춰 주세요.");
+    } else if (v === "warn" && state.prep) {
+      out += textRow("꼭 줘야 한다면", esc(state.prep));
     }
-    if (v === "no") {
-      html += '<a class="btn ' + (v === "no" ? "btn-danger" : "btn-secondary") + ' ate-btn" href="#/ate/' + food.id + '">이미 먹었어요</a>';
-    }
-    return html + "</section>";
+    return out;
   }
 
-  function viewFood(id) {
+  function viewFood(id, si) {
     var food = BY_ID[id];
     if (!food) return viewNotFound();
     var p = activeProfile();
     var hits = (p && p.conditions || []).filter(function (c) { return food.flags.indexOf(c) >= 0; });
-    var states = food.states.slice().sort(function (a, b) {
+    var order = food.states.slice().sort(function (a, b) {
       return RANK[personalize(food, b, p).verdict] - RANK[personalize(food, a, p).verdict];
     });
-    // 금지가 있는 음식은 위험을 먼저 보여준다(상태별로 다를 때는 줄 수 있는 상태 먼저).
-    var overall = foodVerdict(food, p);
-    if (overall === "no") states = food.states;
-
-    var html = '<div class="food-head"><span class="cat">' + CATEGORY[food.category] + "</span>" +
-      '<h1 class="t2 b">' + esc(food.name) + "</h1>" +
-      (food.states.length > 1 ? '<p class="t7 muted" style="margin:4px 0 0">상태별로 판정이 달라요</p>' : "") +
-      "</div>";
-
-    if (hits.length) {
-      html += '<div class="vet-first"><strong>수의사 선생님 안내가 먼저예요</strong>' +
-        esc(hits.map(function (c) { return CONDITIONS[c].subject; }).join(", ") + " " + josa(dogName(p), "이", "")) +
-        "라면<br>다니는 병원의 식단 안내를 먼저 따라 주세요.</div>";
+    var state = (si != null && food.states[si]) ? food.states[si] : order[0];
+    var pv = personalize(food, state, p);
+    var v = pv.verdict;
+    var downgraded = pv.verdict !== state.verdict;
+    var title = downgraded ? josa(dogName(p), "이는", "는") + " 피해 주세요" : VERDICT[v].label;
+    var why;
+    if (downgraded) {
+      var c = CONDITIONS[pv.by[0]];
+      why = c.subject.replace("약한", "약하면") + " " + c.reason + " 피하는 게 좋아요.";
+    } else {
+      why = (SUMMARY[food.name] && state === order[0] && v !== "cond") ? SUMMARY[food.name] : (state.caution || "");
+      if (v === "no") why = (why ? why.replace(/\.?$/, ".") + " " : "") + "아이 손이 닿지 않는 곳에 두어 주세요.";
     }
 
-    html += stateBlock(food, states[0], p, true);
+    var html = '<h1 class="sr-only">' + esc(food.name) + "</h1>" +
+      '<section class="stage ' + v + '"><span class="stage-food">' + esc(food.name) + " · " + esc(state.state) + "</span>" + stageArt(v) + "</section>" +
+      '<div class="verdict-text"><p class="v-title ' + v + '">' + esc(title) + "</p>" +
+      (why ? '<p class="v-sub">' + lines(why) + "</p>" : "") + "</div>";
 
-    if (states.length > 1) {
-      html += '<section class="other-states"><h2 class="section-title">다른 상태는 이래요</h2>' +
-        states.slice(1).map(function (s) { return stateBlock(food, s, p, false); }).join("") + "</section>";
+    if (hits.length) {
+      html += '<div class="notice"><b>수의사 선생님 안내가 먼저예요</b>' +
+        esc(hits.map(function (x) { return CONDITIONS[x].subject; }).join(", ") + " " + josa(dogName(p), "이", "")) +
+        "라면 다니는 병원의 식단 안내를 먼저 따라 주세요.</div>";
+    }
+
+    var rows = detailRows(food, state, p, pv);
+    if (rows) html += '<div class="group">' + rows + "</div>";
+
+    if (food.states.length > 1) {
+      html += '<h2 class="section-title small">다른 상태</h2><div class="group">' +
+        food.states.map(function (s, i) {
+          if (s === state) return "";
+          var spv = personalize(food, s, p);
+          return '<a class="g-row link" href="#/food/' + food.id + "/" + i + '"><span class="bar ' + spv.verdict + '"></span><span class="g-name">' + esc(s.state) + "</span>" + badge(spv.verdict, labelFor(food, s, p)) + chev() + "</a>";
+        }).join("") + "</div>";
     }
 
     if (!p) {
-      html += '<a class="profile-cta" href="#/start/new">' + '<img class="face" src="assets/celine-face.png" alt="" width="36" height="36">' +
-        "<div><b>우리 아이 몸무게로 볼까요?</b><span>이름과 몸무게를 넣으면 아이에게 맞는 양만 보여드려요.</span></div>" +
+      html += '<a class="profile-cta" href="#/start/new"><img class="face" src="assets/celine-face.png" alt="" width="36" height="36">' +
+        "<div><b>우리 아이 몸무게로 볼까요?</b><span>몸무게를 넣으면 아이에게 맞는 양만 보여드려요.</span></div>" +
         '<span class="go">넣기</span></a>';
     }
 
+    html += v === "no"
+      ? '<a class="btn btn-danger pill-btn" href="#/ate/' + food.id + '">이미 먹었어요</a>'
+      : '<a class="btn btn-primary pill-btn" href="#/home">다른 음식 찾아보기</a>';
+
     var srcs = [];
     food.states.forEach(function (s) { s.sources.forEach(function (x) { if (srcs.indexOf(x) < 0) srcs.push(x); }); });
-    html += '<section class="evidence"><b>이렇게 판단했어요</b>' +
-      "<ul>" + srcs.map(function (s) {
+    html += '<p class="ev">근거 ' + srcs.map(function (s) {
         var key = s.replace(/\s*\(.*\)$/, "").trim();
+        if (key === "확인 필요") return "국내 자료 확인 중";
         var url = SOURCES[key];
-        if (key === "확인 필요") return "<li>국내 자료로 한 번 더 확인하고 있어요. 그래서 더 조심스럽게 판정했어요.</li>";
-        return "<li>" + (url ? '<a href="' + url + '" target="_blank" rel="noopener">' + esc(s) + "</a>" : esc(s)) + "</li>";
-      }).join("") + "</ul>" +
-      '<p class="check-note">자료가 엇갈리면 더 조심스러운 쪽으로 정했어요. 양은 넘지 않아야 할 하루 최대치예요.</p>' +
-      '<div class="row"><span>마지막 검토 ' + esc(DATA.reviewedAt.replace(/-/g, ".")) + "</span>" +
-      '<a class="report" href="' + REPORT_URL + "?title=" + encodeURIComponent("정보 확인 요청: " + food.name) + '" target="_blank" rel="noopener">정보가 이상해요 →</a></div>' +
-      "</section>";
+        return url ? '<a href="' + url + '" target="_blank" rel="noopener">' + esc(s) + "</a>" : esc(s);
+      }).join(", ") + " · " + esc(DATA.reviewedAt.replace(/-/g, ".")) + " 검토<br>" +
+      "자료가 엇갈리면 더 조심스러운 쪽으로 정했어요. 양은 넘지 않아야 할 하루 최대치예요.<br>" +
+      '<a class="report" href="' + REPORT_URL + "?title=" + encodeURIComponent("정보 확인 요청: " + food.name) + '" target="_blank" rel="noopener">정보가 이상해요 ›</a></p>';
 
     render(html, { back: true, title: food.name });
   }
@@ -487,31 +495,22 @@
   /* ---------- 화면: 먹었을 때 대처 ---------- */
   function viewAte(id) {
     var food = id ? BY_ID[id] : null;
-    var dangerous = food ? food.states.filter(function (s) { return s.verdict === "no" || s.verdict === "warn"; }) : [];
-    var foodNote = "";
-    if (food && dangerous.length) {
-      foodNote = '<div class="card food-warn"><div class="state" style="display:flex;gap:8px;align-items:center">' + badge(foodVerdict(food, null)) +
-        '<b class="st10">' + esc(food.name) + "</b></div>" +
-        dangerous.map(function (s) { return '<p class="st11" style="margin:8px 0 0;color:#4e5968"><b style="color:#191f28">' + esc(s.state) + "</b> · " + esc(s.caution || "") + "</p>"; }).join("") +
-        "</div>";
-    }
     render(
-      '<section class="emergency-head"><h1 class="t4 b">많이 놀라셨죠.</h1>' +
-        '<p class="t6">지금 괜찮아 보여도 <b>바로 동물병원에 연락해 주세요.</b> 증상이 늦게 나타나는 음식이 많아요.</p></section>' +
-      foodNote +
-      '<ol class="steps">' +
-        "<li><b>동물병원에 전화하기</b><p>다니던 병원이 닫았다면 24시 동물병원에 연락해 주세요.</p>" +
-          '<a class="btn btn-danger" href="' + VET_SEARCH_URL + '" target="_blank" rel="noopener">가까운 24시 동물병원 찾기</a></li>' +
-        "<li><b>전화하기 전에 확인해 두기</b><p>병원에서 꼭 물어보는 것들이에요.</p>" +
-          '<div class="memo">' +
-            ["무엇을 먹었는지 (포장지가 있으면 챙기기)", "얼마나 먹었는지", "언제 먹었는지", "아이 몸무게"].map(function (t, i) {
-              return '<label><input type="checkbox" id="m' + i + '"> ' + esc(t) + "</label>";
-            }).join("") +
-          "</div></li>" +
-        "<li><b>병원 안내 전에는 하지 말아 주세요</b>" +
-          '<ul class="dont t6"><li>억지로 토하게 하기 (소금물, 손가락 넣기)</li><li>우유나 다른 음식 먹이기</li><li>사람 약 먹이기</li></ul></li>' +
-      "</ol>" +
-      '<p class="t7 muted">이 화면은 아이 상태를 판단하지 않아요. 아이 상태는 꼭 수의사 선생님이 확인해 주세요.</p>',
+      '<section class="stage no">' + (food ? '<span class="stage-food">' + esc(food.name) + "</span>" : "") + stageArt("ate") + "</section>" +
+      '<div class="verdict-text"><h1 class="v-title ink">많이 놀라셨죠</h1>' +
+        '<p class="v-sub">지금 괜찮아 보여도 <b>바로 동물병원에 연락해 주세요.</b><br>증상이 늦게 나타나는 음식이 많아요.</p></div>' +
+      '<a class="btn btn-danger pill-btn" href="' + VET_SEARCH_URL + '" target="_blank" rel="noopener">가까운 24시 동물병원 찾기</a>' +
+      '<h2 class="section-title small">전화하기 전에 확인해 두기</h2>' +
+      '<div class="group memo">' +
+        ["무엇을 먹었는지 (포장지가 있으면 챙기기)", "얼마나 먹었는지", "언제 먹었는지", "아이 몸무게"].map(function (t, i) {
+          return '<label class="g-row"><input type="checkbox" id="m' + i + '"> ' + esc(t) + "</label>";
+        }).join("") + "</div>" +
+      '<h2 class="section-title small">병원 안내 전에는 하지 말아 주세요</h2>' +
+      '<div class="group">' +
+        ["억지로 토하게 하기 (소금물, 손가락 넣기)", "우유나 다른 음식 먹이기", "사람 약 먹이기"].map(function (t) {
+          return '<div class="g-row"><span class="bar no"></span><span class="g-name normal">' + esc(t) + "</span></div>";
+        }).join("") + "</div>" +
+      '<p class="ev">이 화면은 아이 상태를 판단하지 않아요.<br>아이 상태는 꼭 수의사 선생님이 확인해 주세요.</p>',
       { back: true, title: "먹었을 때" }
     );
   }
@@ -534,7 +533,7 @@
     if (!top || (!confirmedThisVisit && !sessionBrowse() && (top === "home"))) return viewStart();
     if (top === "home") return viewHome();
     if (top === "search") return viewSearch(query);
-    if (top === "food") return viewFood(parts[1]);
+    if (top === "food") return viewFood(parts[1], parts[2] != null ? parseInt(parts[2], 10) : null);
     return viewNotFound();
   }
   var browsing = false;
