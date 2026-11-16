@@ -266,7 +266,7 @@
       "</section>" + urgentLink() +
       '<form id="start-form" novalidate>' +
         '<div class="field"><label class="label" for="f-name">아이 이름</label>' +
-          '<div class="input"><input id="f-name" maxlength="10" autocomplete="off" placeholder="예: 셀린" value="' + esc(d.name) + '"></div></div>' +
+          '<div class="input"><input id="f-name" maxlength="10" autocomplete="off" placeholder="예: 메리" value="' + esc(d.name) + '"></div></div>' +
         '<div class="field"><span class="label">몸무게</span>' + weightField + "</div>" +
         '<div class="field"><span class="label">아픈 곳이 있나요?</span><span class="hint">여러 개 고를 수 있어요. 고르면 그 아이에게 맞춰 더 조심스럽게 알려드려요.</span>' +
           '<div class="chips" role="group" aria-label="아픈 곳">' + condChips + "</div></div>" +
