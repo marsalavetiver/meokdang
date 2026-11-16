@@ -341,7 +341,7 @@
       var f = BY_NAME[n];
       var v = foodVerdict(f, p);
       var label = v === "mixed" ? VERDICT.mixed.label : labelFor(f, bestState(f, p), p);
-      return '<a class="g-row link" href="#/food/' + f.id + '"><span class="bar ' + v + '"></span><span class="g-name">' + esc(n) + '</span><span class="g-val">' + esc(label) + "</span>" + chev() + "</a>";
+      return '<a class="g-row link" href="#/food/' + f.id + '"><span class="g-name">' + esc(n) + '</span><span class="g-val v-' + v + '">' + esc(label) + "</span>" + chev() + "</a>";
     }).join("");
 
     render(
@@ -386,7 +386,7 @@
       body = '<p class="t7 muted" style="margin:12px 4px 8px">' + list.length + "개를 찾았어요</p>" +
         '<div class="group">' + list.map(function (f) {
           var v = foodVerdict(f, p);
-          return '<a class="g-row link tall" href="#/food/' + f.id + '"><span class="bar ' + v + '"></span><span class="g-name">' + esc(f.name) +
+          return '<a class="g-row link tall" href="#/food/' + f.id + '"><span class="g-name">' + esc(f.name) +
             '<small>' + esc(f.states.map(function (s) { return s.state; }).join(" · ")) + "</small></span>" +
             badge(v, v === "mixed" ? null : labelFor(f, bestState(f, p), p)) + chev() + "</a>";
         }).join("") + "</div>";
@@ -468,7 +468,7 @@
         food.states.map(function (s, i) {
           if (s === state) return "";
           var spv = personalize(food, s, p);
-          return '<a class="g-row link" href="#/food/' + food.id + "/" + i + '"><span class="bar ' + spv.verdict + '"></span><span class="g-name">' + esc(s.state) + "</span>" + badge(spv.verdict, labelFor(food, s, p)) + chev() + "</a>";
+          return '<a class="g-row link" href="#/food/' + food.id + "/" + i + '"><span class="g-name">' + esc(s.state) + "</span>" + badge(spv.verdict, labelFor(food, s, p)) + chev() + "</a>";
         }).join("") + "</div>";
     }
 
@@ -512,7 +512,7 @@
       '<h2 class="section-title small">병원 안내 전에는 하지 말아 주세요</h2>' +
       '<div class="group">' +
         ["억지로 토하게 하기 (소금물, 손가락 넣기)", "우유나 다른 음식 먹이기", "사람 약 먹이기"].map(function (t) {
-          return '<div class="g-row"><span class="bar no"></span><span class="g-name normal">' + esc(t) + "</span></div>";
+          return '<div class="g-row"><span class="g-name normal">' + esc(t) + "</span></div>";
         }).join("") + "</div>" +
       '<p class="ev">이 화면은 아이 상태를 판단하지 않아요.<br>아이 상태는 꼭 수의사 선생님이 확인해 주세요.</p>',
       { back: true, title: "먹었을 때" }

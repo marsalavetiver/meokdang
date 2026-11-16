@@ -268,14 +268,14 @@ p, dd { text-wrap:pretty; }
 .ate-row .ico { margin-right:0; }
 
 .tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
-.tile { border:0; border-radius:var(--radius-card); min-height:84px; padding:12px 12px 10px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; color:var(--text-on-color); font:inherit; position:relative; }
+.tile { border:0; border-radius:var(--radius-card); min-height:84px; padding:12px 12px 10px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; color:var(--text-primary); background:var(--bg-surface); box-shadow:var(--shadow-card); font:inherit; position:relative; transition:background-color .15s; }
 .tile b { font-size:16px; line-height:22px; font-weight:700; }
-.tile span { font-size:12px; line-height:16px; font-weight:700; opacity:.95; }
-.tile.t-ok { background:var(--verdict-ok); } .tile.t-cond { background:var(--verdict-cond); } .tile.t-no { background:var(--verdict-no); }
-.tile.t-warn { background:var(--verdict-warn-badge); color:var(--text-primary); }
-.tile.t-mixed { background:var(--bg-surface); color:var(--text-primary); box-shadow:var(--shadow-card); }
-.tile.t-mixed span { color:var(--grey-700); }
-.tile[aria-pressed="true"] { box-shadow:0 0 0 3px var(--bg-page), 0 0 0 5px var(--text-primary); }
+.tile span { font-size:12px; line-height:16px; font-weight:700; }
+/* 타일은 모두 흰 바탕. 판정은 아래 글자 색으로만 알려 준다 */
+.tile.t-ok span { color:var(--verdict-ok); } .tile.t-cond span { color:var(--verdict-cond); } .tile.t-warn span { color:var(--verdict-warn); } .tile.t-no span { color:var(--verdict-no); } .tile.t-mixed span { color:var(--grey-700); }
+/* 고른 타일은 판정 색의 아주 옅은 바탕으로 */
+.tile[aria-pressed="true"].t-ok { background:var(--verdict-ok-bg); } .tile[aria-pressed="true"].t-cond { background:var(--verdict-cond-bg); } .tile[aria-pressed="true"].t-warn { background:var(--verdict-warn-bg); } .tile[aria-pressed="true"].t-no { background:var(--verdict-no-bg); } .tile[aria-pressed="true"].t-mixed { background:#efefef; }
+.tile[aria-pressed="true"] { box-shadow:none; }
 .preview { margin-top:var(--space-3); }
 
 .group { background:var(--bg-surface); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:2px var(--space-4); margin-top:var(--space-4); }
@@ -288,6 +288,7 @@ p, dd { text-wrap:pretty; }
 .g-name.normal { font-weight:500; }
 .g-name small { display:block; font-size:13px; font-weight:500; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .g-val { font-size:13px; font-weight:700; color:var(--grey-700); }
+.g-val.v-ok { color:var(--verdict-ok); } .g-val.v-cond { color:var(--verdict-cond); } .g-val.v-warn { color:var(--verdict-warn); } .g-val.v-no { color:var(--verdict-no); }
 .g-k { flex:1; font-size:14px; font-weight:600; color:var(--grey-700); }
 .g-k small { display:block; font-size:12px; font-weight:500; color:var(--text-secondary); }
 .g-big { font-size:22px; line-height:29px; font-weight:800; }
