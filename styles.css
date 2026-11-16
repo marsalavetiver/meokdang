@@ -268,14 +268,17 @@ p, dd { text-wrap:pretty; }
 .ate-row .ico { margin-right:0; }
 
 .tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
-.tile { border:0; border-radius:var(--radius-card); min-height:84px; padding:12px 12px 10px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; color:var(--text-primary); background:var(--bg-surface); box-shadow:var(--shadow-card); font:inherit; position:relative; transition:background-color .15s; }
+.tile { border:0; border-radius:var(--radius-card); min-height:84px; padding:12px 12px 10px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; color:var(--text-primary); background:var(--bg-surface); box-shadow:var(--shadow-card); font:inherit; position:relative; }
 .tile b { font-size:16px; line-height:22px; font-weight:700; }
 .tile span { font-size:12px; line-height:16px; font-weight:700; }
 /* 타일은 모두 흰 바탕. 판정은 아래 글자 색으로만 알려 준다 */
 .tile.t-ok span { color:var(--verdict-ok); } .tile.t-cond span { color:var(--verdict-cond); } .tile.t-warn span { color:var(--verdict-warn); } .tile.t-no span { color:var(--verdict-no); } .tile.t-mixed span { color:var(--grey-700); }
-/* 고른 타일은 판정 색의 아주 옅은 바탕으로 */
-.tile[aria-pressed="true"].t-ok { background:var(--verdict-ok-bg); } .tile[aria-pressed="true"].t-cond { background:var(--verdict-cond-bg); } .tile[aria-pressed="true"].t-warn { background:var(--verdict-warn-bg); } .tile[aria-pressed="true"].t-no { background:var(--verdict-no-bg); } .tile[aria-pressed="true"].t-mixed { background:#efefef; }
-.tile[aria-pressed="true"] { box-shadow:none; }
+/* 토스식 눌림과 선택: 누르는 순간 살짝 작아지고, 고른 타일은 그림자가 깊어지며 떠오른다 */
+.tile { transition:transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease; -webkit-tap-highlight-color:transparent; }
+.tile:active { transform:scale(.96); }
+.tile[aria-pressed="true"] { transform:translateY(-3px); box-shadow:0 2px 4px rgba(0,0,0,.04), 0 14px 32px rgba(0,0,0,.14); z-index:1; }
+.tile[aria-pressed="true"]:active { transform:translateY(-3px) scale(.96); }
+@media (prefers-reduced-motion: reduce) { .tile, .tile:active, .tile[aria-pressed="true"] { transition:none; } }
 .preview { margin-top:var(--space-3); }
 
 .group { background:var(--bg-surface); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:2px var(--space-4); margin-top:var(--space-4); }
