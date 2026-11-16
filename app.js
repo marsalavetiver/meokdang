@@ -532,7 +532,7 @@
     render(
       '<article class="doc"><h1>' + esc(doc.title) + '</h1><p class="doc-date">시행일 ' + esc(T.version) + "</p>" +
       '<div class="doc-body">' + body + "</div>" +
-      '<div class="doc-contact"><b>문의 이메일</b><span>' + esc(T.contact) + '</span><a class="report" href="' + mailto(doc.title + " 문의") + '" target="_blank" rel="noopener">메일 보내기 ›</a></div>' +
+      '<div class="doc-contact"><b>운영자</b><span>' + esc(T.operator || "") + '</span><b style="margin-top:8px">문의 이메일</b><span>' + esc(T.contact) + '</span><a class="report" href="' + mailto(doc.title + " 문의") + '" target="_blank" rel="noopener">메일 보내기 ›</a></div>' +
       '<a class="doc-other" href="#/' + other[0] + '">' + other[1] + " 보기 ›</a></article>",
       { back: true, title: doc.title }
     );
