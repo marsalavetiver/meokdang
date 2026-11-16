@@ -9,9 +9,8 @@
   FOODS.forEach(function (f) { BY_NAME[f.name] = f; BY_ID[f.id] = f; });
 
   // 정보 정정·음식 추가 요청은 이메일로 받는다.
-  var CONTACT_EMAIL = "zrrdrrzrr@gmail.com";
+  var CONTACT_EMAIL = (window.MEOKDANG_TERMS && window.MEOKDANG_TERMS.contact) || "zrrdrrzrr@gmail.com";
   function mailto(subject) { return "mailto:" + CONTACT_EMAIL + "?subject=" + encodeURIComponent("[먹어도 댕?] " + subject); }
-  var TERMS_DATE = "2026년 11월 16일";
   // 앱인토스 번들(dist)에서만 ait-bridge.js가 window.__AIT__를 만든다.
   var IN_TOSS = !!(window.__AIT__ && window.__AIT__.openURL);
   if (IN_TOSS) document.documentElement.classList.add("in-toss");
@@ -277,7 +276,7 @@
             ? '<button class="btn btn-ghost" type="button" data-act="forget">이 기기에서 정보 지우기</button>'
             : '<button class="btn btn-ghost" type="button" data-act="browse">입력 없이 둘러볼게요</button>') +
         "</div>" +
-        (editing ? "" : '<p class="consent">시작하면 <a href="#/terms">이용 안내</a>에 동의한 것으로 봐요.</p>') +
+        (editing ? "" : '<p class="consent">시작하면 <a href="#/terms">이용약관</a>과 <a href="#/privacy">개인정보 처리 안내</a>에 동의한 것으로 봐요.</p>') +
       "</form>",
       { hidden: !editing, back: editing, title: "시작" }
     );
@@ -522,19 +521,20 @@
     render('<div class="empty-state">' + celine("mark") + '<h1 class="t5 b">페이지를 찾지 못했어요</h1><p>주소가 바뀌었을 수 있어요.</p><a class="btn btn-primary" href="#/home">홈으로 가기</a></div>', { title: "없는 페이지" });
   }
 
-  /* ---------- 화면: 이용 안내 ---------- */
-  function viewTerms() {
-    var sec = function (t, body) { return '<h2 class="section-title small">' + t + '</h2><div class="group terms"><div class="g-row text"><div>' + body + "</div></div></div>"; };
+  /* ---------- 화면: 이용약관 · 개인정보 처리 안내 ---------- */
+  function viewDoc(kind) {
+    var T = window.MEOKDANG_TERMS, doc = T && T[kind];
+    if (!doc) return viewNotFound();
+    var other = kind === "terms" ? ["privacy", "개인정보 처리 안내"] : ["terms", "이용약관"];
+    var body = doc.sections.map(function (sec) {
+      return '<section class="doc-sec"><h2>' + esc(sec[0]) + "</h2><p>" + sec[1].replace(/\{version\}/g, esc(T.version)) + "</p></section>";
+    }).join("");
     render(
-      '<div class="terms-page"><h1 class="t5 b">이용 안내</h1><p class="muted t7">시행일 ' + TERMS_DATE + "</p>" +
-      sec("이 서비스는", "강아지에게 음식을 줘도 되는지 공개된 자료를 바탕으로 정리한 일반 정보예요.<br>수의사의 진료나 처방을 대신하지 않아요.") +
-      sec("판정 기준", "출처가 두 곳 이상인 자료를 비교하고, 자료가 엇갈리면 더 조심스러운 쪽으로 정해요.<br>양은 권장량이 아니라 넘지 않아야 할 하루 최대치예요.<br>아이마다 체질과 건강 상태가 달라서 모든 아이에게 맞는다고 보장하지 않아요.") +
-      sec("이럴 땐 꼭 병원에 먼저", "아픈 곳이 있거나 치료 중인 아이는 다니는 병원의 안내를 먼저 따라 주세요.<br>먹으면 안 되는 걸 먹었다면 증상이 없어도 바로 동물병원에 연락해 주세요.<br>이 서비스는 아이 상태를 판단하지 않아요.") +
-      sec("책임의 범위", "운영자는 정보를 정확하게 유지하려고 노력하고, 잘못된 정보를 알게 되면 바로 고쳐요.<br>다만 법이 허용하는 범위에서, 운영자의 고의나 중대한 과실이 없는 한 이 정보를 이용해 생긴 결과에 대해서는 책임을 지지 않아요.") +
-      sec("아이 정보", "아이 이름, 몸무게, 아픈 곳은 이 기기에만 저장되고 운영자에게 보내지 않아요.<br>시작 화면의 '이 기기에서 정보 지우기'로 언제든 지울 수 있어요.") +
-      sec("문의와 정정 요청", "정보가 이상하거나 찾는 음식이 없으면 알려 주세요.<br>" + esc(CONTACT_EMAIL) + "<br>" + '<a class="report" href="' + mailto("문의") + '" target="_blank" rel="noopener">메일 보내기 ›</a>') +
-      "</div>",
-      { back: true, title: "이용 안내" }
+      '<article class="doc"><h1>' + esc(doc.title) + '</h1><p class="doc-date">시행일 ' + esc(T.version) + "</p>" +
+      '<div class="doc-body">' + body + "</div>" +
+      '<div class="doc-contact"><b>문의 이메일</b><span>' + esc(T.contact) + '</span><a class="report" href="' + mailto(doc.title + " 문의") + '" target="_blank" rel="noopener">메일 보내기 ›</a></div>' +
+      '<a class="doc-other" href="#/' + other[0] + '">' + other[1] + " 보기 ›</a></article>",
+      { back: true, title: doc.title }
     );
   }
 
@@ -547,7 +547,7 @@
     var top = parts[0] || "";
 
     if (top === "ate") return viewAte(parts[1]);
-    if (top === "terms") return viewTerms();
+    if (top === "terms" || top === "privacy") return viewDoc(top);
     if (top === "start") return viewStart(parts[1]);
     // 첫 방문: 시작 화면. 저장된 정보가 있으면 '다시 오셨네요'로 확인.
     if (!top || (!confirmedThisVisit && !sessionBrowse() && (top === "home"))) return viewStart();
