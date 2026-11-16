@@ -651,6 +651,16 @@
     }
   });
 
+  // 토스 '주요 기능' 바로가기: intoss://meokdang?page=search 처럼 들어오면 해당 화면으로 보낸다.
+  // 경로로 들어오는 경우(/search, /ate …)도 같이 받는다.
+  (function deepLink() {
+    if (location.hash && location.hash !== "#" && location.hash !== "#/") return;
+    var params = new URLSearchParams(location.search);
+    var page = params.get("page") || location.pathname.split("/").filter(Boolean).pop() || "";
+    var map = { search: "#/home", home: "#/home", ate: "#/ate", profile: "#/start/edit", terms: "#/terms", privacy: "#/privacy" };
+    if (page === "search" && params.get("q")) { location.replace("#/search?q=" + encodeURIComponent(params.get("q"))); return; }
+    if (map[page]) location.replace(map[page]);
+  })();
   window.addEventListener("hashchange", route);
   route();
 })();
