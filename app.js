@@ -19,7 +19,7 @@
   var VERDICT = {
     ok:    { label: "괜찮아요",          lead: "간식으로 좋아요" },
     cond:  { label: "이렇게 주면 돼요",  lead: "이렇게만 주세요" },
-    warn:  { label: "안 주는 게 좋아요", lead: "일부러 주진 마세요" },
+    warn:  { label: "주지 마세요",       lead: "주지 마세요" },
     no:    { label: "절대 안 돼요",      lead: "조금만 먹어도 위험해요" },
     mixed: { label: "상태별로 달라요",  lead: "" }
   };
@@ -96,7 +96,7 @@
   }
 
   /* ---------- 판정 ---------- */
-  // 아이의 질환을 반영한 판정. 질환견이 피할 음식이면 '안 주는 게 좋아요'로 낮춘다.
+  // 아이의 질환을 반영한 판정. 질환견이 피할 음식이면 '주지 마세요'로 낮춘다.
   function personalize(food, state, p) {
     var hit = (p && p.conditions || []).filter(function (c) { return food.flags.indexOf(c) >= 0; });
     var v = state.verdict;
@@ -140,7 +140,7 @@
 
   function shortReason(food, p) {
     var hit = (p && p.conditions || []).filter(function (c) { return food.flags.indexOf(c) >= 0; });
-    if (hit.length && foodVerdict(food, p) !== "no") return CONDITIONS[hit[0]].subject + " " + josa(dogName(p), "이에게는", "에게는") + " 권하지 않아요. " + CONDITIONS[hit[0]].reason + " 피하는 게 좋다고 알려져 있어요.";
+    if (hit.length && foodVerdict(food, p) !== "no") return CONDITIONS[hit[0]].subject + " " + josa(dogName(p), "이에게는", "에게는") + " 주지 마세요. " + CONDITIONS[hit[0]].reason + " 주지 않는 게 안전해요.";
     if (SUMMARY[food.name]) return SUMMARY[food.name];
     var s = bestState(food, p);
     var v = foodVerdict(food, p);
@@ -322,7 +322,7 @@
   }
   function labelFor(food, state, p) {
     var pv = personalize(food, state, p);
-    return pv.verdict !== state.verdict ? josa(dogName(p), "이는", "는") + " 피하기" : VERDICT[pv.verdict].label;
+    return VERDICT[pv.verdict].label;
   }
 
   /* ---------- 화면: 홈 ---------- */
@@ -406,10 +406,8 @@
   function detailRows(food, state, p, pv) {
     var v = pv.verdict, out = "";
     var downgraded = pv.verdict !== state.verdict;
-    if (downgraded) {
-      out += textRow("건강한 아이라면", esc(VERDICT[state.verdict].label) + (state.prep ? " · " + esc(state.prep) : ""));
-      return out;
-    }
+    // 질환으로 '주지 마세요'가 된 음식은 건강한 아이용 급여 방법도 보여 주지 않는다(보수적 기준).
+    if (downgraded) return out;
     if (v === "ok" || v === "cond") {
       var a = state.amount, band = bandOf(p);
       if (a && a.s && band) {
@@ -421,9 +419,8 @@
       }
       if (state.prep) out += textRow("이렇게 주세요", esc(state.prep));
       out += textRow("처음이라면", "절반만 주고, 다음 날 응가 상태를 살펴봐 주세요.<br>이상하면 바로 멈춰 주세요.");
-    } else if (v === "warn" && state.prep) {
-      out += textRow("꼭 줘야 한다면", esc(state.prep));
     }
+    // '주지 마세요'는 줄 방법을 보여 주지 않는다(보수적 기준).
     return out;
   }
 
@@ -439,11 +436,11 @@
     var pv = personalize(food, state, p);
     var v = pv.verdict;
     var downgraded = pv.verdict !== state.verdict;
-    var title = downgraded ? josa(dogName(p), "이는", "는") + " 피해 주세요" : VERDICT[v].label;
+    var title = downgraded ? josa(dogName(p), "이에게는", "에게는") + " 주지 마세요" : VERDICT[v].label;
     var why;
     if (downgraded) {
       var c = CONDITIONS[pv.by[0]];
-      why = c.subject.replace("약한", "약하면") + " " + c.reason + " 피하는 게 좋아요.";
+      why = c.subject.replace("약한", "약하면") + " " + c.reason + " 주지 않는 게 안전해요.";
     } else {
       why = (SUMMARY[food.name] && state === order[0] && v !== "cond") ? SUMMARY[food.name] : (state.caution || "");
       if (v === "no") why = (why ? why.replace(/\.?$/, ".") + " " : "") + "아이 손이 닿지 않는 곳에 두어 주세요.";
