@@ -11,6 +11,9 @@
   // 문제 신고는 GitHub 이슈로 받는다. 나중에 구글 폼 주소로 바꿔도 된다.
   var REPORT_URL = "https://github.com/marsalavetiver/meokdang/issues/new";
   var REQUEST_URL = REPORT_URL;
+  // 앱인토스 번들(dist)에서만 ait-bridge.js가 window.__AIT__를 만든다.
+  var IN_TOSS = !!(window.__AIT__ && window.__AIT__.openURL);
+  if (IN_TOSS) document.documentElement.classList.add("in-toss");
   var VET_SEARCH_URL = "https://map.naver.com/p/search/" + encodeURIComponent("24시 동물병원");
 
   var VERDICT = {
@@ -203,16 +206,17 @@
   function backIcon() { return '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="#191f28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
 
   function urgentLink() {
-    return '<a class="ate-row" href="#/ate"><span class="ico" aria-hidden="true">!</span><b>먹으면 안 되는 걸 먹었나요?</b>' + chev() + "</a>";
+    return '<a class="ate-row" href="#/ate"><b>먹으면 안 되는 걸 먹었나요?</b>' + chev() + "</a>";
   }
 
   function header(opts) {
     opts = opts || {};
     var p = activeProfile();
-    var left = opts.back
+    // 토스 안에서는 토스 상단 바가 로고·뒤로가기를 맡으므로 프로필 칩만 남긴다.
+    var left = opts.back && !IN_TOSS
       ? '<button class="icon-btn" data-act="back" aria-label="뒤로">' + backIcon() + "</button>"
       : "";
-    var logo = '<a class="logo" href="#/home" aria-label="먹어도 댕? 홈">먹어도 댕?</a>';
+    var logo = IN_TOSS ? "" : '<a class="logo" href="#/home" aria-label="먹어도 댕? 홈">먹어도 댕?</a>';
     var chip = p
       ? '<button class="profile-chip" data-act="profile" aria-label="아이 정보 바꾸기: ' + esc(dogName(p)) + '"><img class="face" src="assets/celine-face.png" alt="">' + esc(dogName(p)) + (p.weight ? " · " + p.weight + "kg" : "") + "</button>"
       : '<button class="profile-chip empty" data-act="profile">아이 정보 넣기</button>';
@@ -375,7 +379,7 @@
     if (!list.length) {
       body = '<div class="empty-state">' + celine("mark") +
         '<h2 class="t5 b" style="margin:12px 0 0">찾는 음식이 아직 없나요?</h2>' +
-        "<p>알려주시면 빨리 챙겨둘게요.<br>급하다면 수의사 선생님께 먼저 물어봐 주세요.</p>" +
+        "<p>알려주시면 빨리 챙겨둘게요.<br>급하다면 수의사 선생님에게 먼저 물어봐 주세요.</p>" +
         '<a class="btn btn-secondary" href="' + REQUEST_URL + '?title=' + encodeURIComponent("음식 추가 요청: " + q) + '" target="_blank" rel="noopener">이 음식 알려주기</a>' +
         urgentLink() + "</div>";
     } else {
@@ -470,7 +474,7 @@
 
     if (!p) {
       html += '<a class="profile-cta" href="#/start/new"><img class="face" src="assets/celine-face.png" alt="" width="36" height="36">' +
-        "<div><b>우리 아이 몸무게로 볼까요?</b><span>몸무게를 넣으면 아이에게 맞는 양만 보여드려요.</span></div>" +
+        "<div><b>우리 아이 몸무게로 볼까요?</b><span>몸무게를 넣으면 아이에게 맞는 양만 보여 줄게요.</span></div>" +
         '<span class="go">넣기</span></a>';
     }
 
@@ -497,7 +501,7 @@
     var food = id ? BY_ID[id] : null;
     render(
       '<section class="stage no">' + (food ? '<span class="stage-food">' + esc(food.name) + "</span>" : "") + stageArt("ate") + "</section>" +
-      '<div class="verdict-text"><h1 class="v-title ink">많이 놀라셨죠</h1>' +
+      '<div class="verdict-text"><h1 class="v-title ink">많이 놀랐죠</h1>' +
         '<p class="v-sub">지금 괜찮아 보여도 <b>바로 동물병원에 연락해 주세요.</b><br>증상이 늦게 나타나는 음식이 많아요.</p></div>' +
       '<a class="btn btn-danger pill-btn" href="' + VET_SEARCH_URL + '" target="_blank" rel="noopener">가까운 24시 동물병원 찾기</a>' +
       '<h2 class="section-title small">전화하기 전에 확인해 두기</h2>' +
@@ -552,6 +556,9 @@
   }
 
   document.addEventListener("click", function (e) {
+    // 토스 안에서는 새 창 링크(지도, 신고)를 토스의 외부 브라우저로 연다.
+    var ext = IN_TOSS && e.target.closest('a[target="_blank"]');
+    if (ext) { e.preventDefault(); window.__AIT__.openURL(ext.href).catch(function () { location.href = ext.href; }); return; }
     var el = e.target.closest("[data-act],[data-chip],[data-size],[data-cond]");
     if (!el) return;
     if (el.dataset.chip) {

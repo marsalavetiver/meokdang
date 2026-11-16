@@ -313,3 +313,7 @@ p, dd { text-wrap:pretty; }
 .ev { margin:var(--space-5) 0 0; text-align:center; font-size:12px; line-height:19px; color:var(--grey-700); }
 .ev a { color:var(--grey-700); }
 .ev .report { font-weight:700; text-decoration:none; display:inline-flex; min-height:var(--size-touch); align-items:center; }
+
+/* 앱인토스(토스 앱 안): 토스 상단 바 아래에 프로필 칩만 오른쪽에 둔다 */
+html.in-toss .top { position:static; background:transparent; backdrop-filter:none; justify-content:flex-end; min-height:0; padding:var(--space-2) var(--space-5) 0; }
+html.in-toss .top:empty { display:none; }
