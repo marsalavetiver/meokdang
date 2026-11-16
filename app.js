@@ -400,7 +400,7 @@
   }
 
   /* ---------- 화면: 판정 카드 ---------- */
-  function row(k, v) { return '<div class="g-row"><span class="g-k">' + k + '</span><span class="g-big">' + v + "</span></div>"; }
+  function row(k, v) { return '<div class="g-row kv"><span class="g-k">' + k + '</span><span class="g-big">' + v + "</span></div>"; }
   function textRow(k, t) { return '<div class="g-row text"><div><small>' + k + "</small>" + t + "</div></div>"; }
 
   function detailRows(food, state, p, pv) {

@@ -291,7 +291,9 @@ p, dd { text-wrap:pretty; }
 .g-k { flex:1; font-size:14px; font-weight:600; color:var(--grey-700); }
 .g-k small { display:block; font-size:12px; font-weight:500; color:var(--text-secondary); }
 .g-big { font-size:22px; line-height:29px; font-weight:800; }
-.g-row.text { padding:12px 0; font-size:15px; line-height:22.5px; }
+.g-row.text { padding:14px 0; font-size:15px; line-height:22.5px; }
+/* 판정 화면 묶음 목록: 양(숫자) 행도 글 행과 같은 위아래 여백 */
+.g-row.kv { padding:14px 0; }
 .g-row.text small { display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:2px; }
 .memo .g-row { gap:10px; font-size:15px; }
 .memo input { width:20px; height:20px; accent-color:var(--grey-900); }
