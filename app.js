@@ -14,6 +14,11 @@
   // 앱인토스 번들(dist)에서만 ait-bridge.js가 window.__AIT__를 만든다.
   var IN_TOSS = !!(window.__AIT__ && window.__AIT__.openURL);
   if (IN_TOSS) document.documentElement.classList.add("in-toss");
+  // 토스 콘솔 지표용 익명 이벤트. 토스 안에서만 보내고, 이름·몸무게 같은 아이 정보는 보내지 않는다.
+  function track(name, params) {
+    if (!IN_TOSS || !window.__AIT__.log) return;
+    try { window.__AIT__.log({ log_name: name, log_type: "event", params: params || {} }).catch(function () {}); } catch (e) {}
+  }
   var VET_SEARCH_URL = "https://map.naver.com/p/search/" + encodeURIComponent("24시 동물병원");
 
   var VERDICT = {
@@ -376,6 +381,7 @@
   function viewSearch(q) {
     var p = activeProfile();
     var list = search(q);
+    track("search", { query: String(q || "").slice(0, 20), results: list.length });
     var body;
     if (!list.length) {
       body = '<div class="empty-state">' + celine("mark") +
@@ -434,6 +440,8 @@
       return RANK[personalize(food, b, p).verdict] - RANK[personalize(food, a, p).verdict];
     });
     var state = (si != null && food.states[si]) ? food.states[si] : order[0];
+    var tv = personalize(food, state, p).verdict;
+    track("verdict_view", { food: food.id, state: state.state, verdict: tv, downgraded: tv !== state.verdict, has_profile: !!p });
     var pv = personalize(food, state, p);
     var v = pv.verdict;
     var downgraded = pv.verdict !== state.verdict;
@@ -497,6 +505,7 @@
   /* ---------- 화면: 먹었을 때 대처 ---------- */
   function viewAte(id) {
     var food = id ? BY_ID[id] : null;
+    track("ate_view", { food: food ? food.id : "" });
     render(
       '<section class="stage no">' + (food ? '<span class="stage-food">' + esc(food.name) + "</span>" : "") + stageArt("ate") + "</section>" +
       '<div class="verdict-text"><h1 class="v-title ink">많이 놀랐죠</h1>' +
@@ -644,6 +653,7 @@
       if (draft.unknown) { if (!draft.size) return; p.size = draft.size; }
       else { var w = readWeight(); if (!w) return; p.weight = w; }
       saveProfile(p);
+      track("profile_saved", { conditions: p.conditions.length, by_size: !!p.size });
       confirmedThisVisit = true;
       browsing = false;
       toast(dogName(p) + " 정보를 저장했어요");
