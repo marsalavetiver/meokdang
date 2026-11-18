@@ -438,6 +438,19 @@
     return out;
   }
 
+  // 판정 바로 아래에 보여 줄 근거 한 줄: 이 상태의 출처 + 검토일 (정보 전달 화면이라 위에 둔다)
+  function sourceLine(food, state) {
+    var srcs = (state.sources && state.sources.length) ? state.sources.slice() : [];
+    if (!srcs.length) food.states.forEach(function (st) { st.sources.forEach(function (x) { if (srcs.indexOf(x) < 0) srcs.push(x); }); });
+    var items = srcs.map(function (src) {
+      var key = src.replace(/\s*\(.*\)$/, "").trim();
+      if (key === "확인 필요") return "국내 자료 확인 중";
+      var url = SOURCES[key];
+      return url ? '<a href="' + url + '" target="_blank" rel="noopener">' + esc(src) + "</a>" : esc(src);
+    });
+    return '<p class="src-line"><b>근거</b> ' + items.join(", ") + '<span class="dot" aria-hidden="true">·</span>' + esc(DATA.reviewedAt.replace(/-/g, ".")) + " 검토</p>";
+  }
+
   function viewFood(id, si) {
     var food = BY_ID[id];
     if (!food) return viewNotFound();
@@ -465,7 +478,7 @@
     var html = '<h1 class="sr-only">' + esc(food.name) + "</h1>" +
       '<section class="stage ' + v + '"><span class="stage-food">' + esc(food.name) + " · " + esc(state.state) + "</span>" + stageArt(v) + "</section>" +
       '<div class="verdict-text"><p class="v-title ' + v + '">' + esc(title) + "</p>" +
-      (why ? '<p class="v-sub">' + lines(why) + "</p>" : "") + "</div>";
+      (why ? '<p class="v-sub">' + lines(why) + "</p>" : "") + sourceLine(food, state) + "</div>";
 
     if (hits.length) {
       html += '<div class="notice"><b>수의사 안내 우선</b>' +
@@ -495,14 +508,7 @@
       ? '<a class="btn btn-danger pill-btn" href="#/ate/' + food.id + '">먹었을 때 대처법</a>'
       : '<a class="btn btn-primary pill-btn" href="#/home">다른 음식 검색</a>';
 
-    var srcs = [];
-    food.states.forEach(function (s) { s.sources.forEach(function (x) { if (srcs.indexOf(x) < 0) srcs.push(x); }); });
-    html += '<p class="ev">근거 ' + srcs.map(function (s) {
-        var key = s.replace(/\s*\(.*\)$/, "").trim();
-        if (key === "확인 필요") return "국내 자료 확인 중";
-        var url = SOURCES[key];
-        return url ? '<a href="' + url + '" target="_blank" rel="noopener">' + esc(s) + "</a>" : esc(s);
-      }).join(", ") + " · " + esc(DATA.reviewedAt.replace(/-/g, ".")) + " 검토<br>" +
+    html += '<p class="ev">' +
       "자료가 서로 다르면 더 보수적인 기준을 적용했어요. 양은 넘지 않아야 할 하루 최대치예요.<br>" +
       '<a class="report" href="' + mailto("정보 확인 요청: " + food.name + " · " + state.state) + '" target="_blank" rel="noopener">정보 오류 신고 ›</a></p>';
 
