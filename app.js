@@ -123,11 +123,11 @@
   // 홈 미리보기에 쓰는 다정한 한 줄 (말투 가이드 기준). 없으면 데이터 문구를 쓴다.
   var SUMMARY = {
     "포도": "한두 알만 먹어도 신장이 크게 아플 수 있어요. 샤인머스캣과 건포도도 똑같아요.",
-    "고구마": "푹 찐 고구마는 괜찮다고 알려져 있어요. 생고구마는 소화가 어려워 주지 말아 주세요.",
-    "닭가슴살": "껍질·뼈 없이 소금 없이 삶은 살코기는 괜찮다고 알려져 있어요. 생으로는 주지 말아 주세요.",
+    "고구마": "푹 찐 고구마는 괜찮다고 알려져 있어요. 생고구마는 소화가 어려워 주지 마세요.",
+    "닭가슴살": "껍질·뼈 없이 소금 없이 삶은 살코기는 괜찮다고 알려져 있어요. 생으로는 주지 마세요.",
     "황태": "아무 양념 없는 황태채를 찬물에 불려 짠기를 빼면 괜찮다고 알려져 있어요.",
     "수박": "씨와 껍질만 빼면 괜찮은 과일로 알려져 있어요. 여름 수분 간식으로 좋아요.",
-    "김": "아무것도 바르지 않은 맨김만 조금 괜찮아요. 조미김은 짜서 주지 말아 주세요.",
+    "김": "아무것도 바르지 않은 맨김만 조금 괜찮아요. 조미김은 짜서 주지 마세요.",
     "사과": "씨와 심만 빼면 괜찮은 과일로 알려져 있어요.",
     "달걀": "완전히 익힌 달걀은 괜찮다고 알려져 있어요. 날달걀은 피해 주세요.",
     "바나나": "괜찮지만 당이 높아서 가끔만 조금 주세요.",
@@ -135,12 +135,12 @@
     "양파": "익혀도, 가루나 국물이어도 위험해요. 증상이 늦게 나타날 수 있어요.",
     "치즈": "짜지 않은 저지방 치즈를 아주 조금만 괜찮아요. 슬라이스 치즈는 짜요.",
     "귤": "껍질과 씨를 빼고 과육만 조금은 괜찮다고 알려져 있어요.",
-    "떡": "끈적여서 목이나 장에 걸릴 수 있어요. 조금이라도 주지 말아 주세요.",
+    "떡": "끈적여서 목이나 장에 걸릴 수 있어요. 조금이라도 주지 마세요.",
     "블루베리": "씻어서 그대로 줘도 괜찮은 과일로 알려져 있어요. 작은 아이는 반으로 잘라 주세요.",
     "초콜릿": "진할수록 더 위험하고, 화이트 초콜릿도 안 돼요.",
     "감": "껍질·씨·꼭지를 뺀 생감 과육만 조금 괜찮아요. 곶감은 당이 높아요.",
     "배": "씨와 심만 빼면 괜찮은 과일로 알려져 있어요.",
-    "단호박": "껍질과 씨를 빼고 푹 찌면 괜찮다고 알려져 있어요. 생으로는 주지 말아 주세요."
+    "단호박": "껍질과 씨를 빼고 푹 찌면 괜찮다고 알려져 있어요. 생으로는 주지 마세요."
   };
 
   function shortReason(food, p) {
@@ -211,7 +211,7 @@
   function backIcon() { return '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" fill="none" stroke="#191f28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
 
   function urgentLink() {
-    return '<a class="ate-row" href="#/ate"><b>먹으면 안 되는 걸 먹었나요?</b>' + chev() + "</a>";
+    return '<a class="ate-row" href="#/ate"><b>먹으면 안 되는 음식을 먹었을 때</b>' + chev() + "</a>";
   }
 
   function header(opts) {
@@ -256,32 +256,32 @@
         ["s", "m", "l"].map(function (k) {
           return '<button type="button" class="chip" data-size="' + k + '" aria-pressed="' + (d.size === k) + '">' + BANDS[k].label + "<small>" + BANDS[k].range + "</small></button>";
         }).join("") + "</div>" +
-        '<button type="button" class="toggle-link" data-act="weight-known">몸무게를 알아요</button>'
+        '<button type="button" class="toggle-link" data-act="weight-known">몸무게로 입력</button>'
       : '<label class="input"><input id="f-weight" inputmode="decimal" autocomplete="off" placeholder="예: 4.2" value="' + esc(d.weight) + '" aria-label="몸무게"><span class="unit">kg</span></label>' +
-        '<button type="button" class="toggle-link" data-act="weight-unknown">몸무게를 잘 몰라요</button>';
+        '<button type="button" class="toggle-link" data-act="weight-unknown">크기로 선택</button>';
     var condChips = ["kidney", "pancreas", "thyroid"].map(function (c) {
       return '<button type="button" class="chip" data-cond="' + c + '" aria-pressed="' + (d.conditions.indexOf(c) >= 0) + '">' + CONDITIONS[c].label + "</button>";
-    }).join("") + '<button type="button" class="chip" data-cond="none" aria-pressed="' + (d.conditions.length === 0 && d.touchedCond ? "true" : "false") + '">없어요</button>';
+    }).join("") + '<button type="button" class="chip" data-cond="none" aria-pressed="' + (d.conditions.length === 0 && d.touchedCond ? "true" : "false") + '">해당 없음</button>';
 
     render(
       '<section class="start-hero hero-center">' +
         celine("mark") +
-        '<h1 class="st5 b">' + (editing ? "아이 정보를 바꿀게요" : "오늘 누구의 음식을<br>확인할까요?") + "</h1>" +
-        '<p class="t6 muted">몸무게에 맞춰 하루 최대량을 알려드려요. 정보는 이 기기에만 저장돼요.</p>' +
+        '<h1 class="st5 b">' + (editing ? "아이 정보 수정" : "아이 정보 입력") + "</h1>" +
+        '<p class="t6 muted">입력한 몸무게로 하루 최대량을 계산해요.<br>정보는 이 기기에만 저장돼요.</p>' +
       "</section>" + urgentLink() +
       '<form id="start-form" novalidate>' +
         '<div class="field"><label class="label" for="f-name">아이 이름</label>' +
           '<div class="input"><input id="f-name" maxlength="10" autocomplete="off" placeholder="예: 메리" value="' + esc(d.name) + '"></div></div>' +
         '<div class="field"><span class="label">몸무게</span>' + weightField + "</div>" +
-        '<div class="field"><span class="label">아픈 곳이 있나요?</span><span class="hint">여러 개 고를 수 있어요. 고르면 그 아이에게 맞춰 더 조심스럽게 알려드려요.</span>' +
+        '<div class="field"><span class="label">건강 상태</span><span class="hint">해당하는 항목을 모두 골라 주세요. 고른 항목에 맞춰 더 엄격한 기준을 적용해요.</span>' +
           '<div class="chips" role="group" aria-label="아픈 곳">' + condChips + "</div></div>" +
         '<div class="actions">' +
-          '<button class="btn btn-primary" type="submit" id="start-go">' + (editing ? "저장하기" : "확인하러 가기") + "</button>" +
+          '<button class="btn btn-primary" type="submit" id="start-go">' + (editing ? "저장하기" : "시작하기") + "</button>" +
           (editing
             ? '<button class="btn btn-ghost" type="button" data-act="forget">이 기기에서 정보 지우기</button>'
-            : '<button class="btn btn-ghost" type="button" data-act="browse">입력 없이 둘러볼게요</button>') +
+            : '<button class="btn btn-ghost" type="button" data-act="browse">입력 없이 둘러보기</button>') +
         "</div>" +
-        (editing ? "" : '<p class="consent">시작하면 <a href="#/terms">이용약관</a>과 <a href="#/privacy">개인정보 처리 안내</a>에 동의한 것으로 봐요.</p>') +
+        (editing ? "" : '<p class="consent">시작하면 <a href="#/terms">이용약관</a>과 <a href="#/privacy">개인정보 처리 안내</a>에 동의한 것으로 간주해요.</p>') +
       "</form>",
       { hidden: !editing, back: editing, title: "시작" }
     );
@@ -304,16 +304,16 @@
   function viewWelcomeBack(p) {
     render(
       '<section class="start-hero hero-center">' + celine("mark") +
-        '<h1 class="st5 b">다시 오셨네요, 보호자님</h1>' +
-        '<p class="t6 muted">오늘도 ' + esc(josa(dogName(p), "이", "")) + "의 음식을 확인할까요?</p>" +
+        '<h1 class="st5 b">저장된 아이 정보</h1>' +
+        '<p class="t6 muted">아래 정보를 기준으로 판정해요.</p>' +
       "</section>" +
       '<div class="card saved" style="margin-top:24px"><div class="avatar"><img src="assets/celine-face.png" alt=""></div>' +
         "<dl><dt>" + esc(dogName(p)) + "</dt><dd>" + esc(profileSummary(p)) + "</dd></dl></div>" +
-      '<p class="t7 muted" style="margin:12px 4px 0">몸무게가 바뀌었다면 정보를 고쳐 주세요. 양이 달라져요.</p>' +
+      '<p class="t7 muted" style="margin:12px 4px 0">몸무게가 바뀌었다면 정보를 수정해 주세요. 하루 최대량이 달라져요.</p>' +
       '<div class="actions">' +
-        '<button class="btn btn-primary" data-act="confirm">' + esc(josa(dogName(p), "이", "")) + " 맞아요</button>" +
-        '<button class="btn btn-secondary" data-act="edit">정보 바꾸기</button>' +
-        '<button class="btn btn-ghost" data-act="new">다른 아이예요</button>' +
+        '<button class="btn btn-primary" data-act="confirm">이 정보로 시작하기</button>' +
+        '<button class="btn btn-secondary" data-act="edit">정보 수정</button>' +
+        '<button class="btn btn-ghost" data-act="new">다른 아이 입력</button>' +
       "</div>",
       { hidden: true, title: "시작" }
     );
@@ -352,9 +352,9 @@
 
     render(
       '<section class="hero-center">' + celine("hero-celine") +
-        '<h1 class="st5 b">' + who + " 주고 싶은<br>음식이 있나요?</h1></section>" +
+        '<h1 class="st5 b">' + who + " 줘도 되는지<br>바로 확인해요</h1></section>" +
       '<form class="search pill-search" id="search-form" role="search">' +
-        '<label class="input">' + searchIcon() + '<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="음식 이름을 써 주세요 (예: 황태)" aria-label="음식 검색"></label>' +
+        '<label class="input">' + searchIcon() + '<input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="음식 이름 검색 (예: 황태)" aria-label="음식 검색"></label>' +
       "</form>" + urgentLink() +
       '<section class="section"><h2 class="section-title">많이 물어본 음식</h2>' +
         '<div class="tiles" role="group" aria-label="많이 물어본 음식">' + tiles + "</div>" +
@@ -367,7 +367,7 @@
   }
 
   function previewHTML(id) {
-    if (!id) return '<p class="t7 muted" style="margin:2px 2px 0">음식을 누르면 여기에서 바로 알려드려요.</p>';
+    if (!id) return '<p class="t7 muted" style="margin:2px 2px 0">음식을 누르면 판정이 여기에 표시돼요.</p>';
     var f = BY_ID[id];
     var p = activeProfile();
     var v = foodVerdict(f, p);
@@ -385,12 +385,12 @@
     var body;
     if (!list.length) {
       body = '<div class="empty-state">' + celine("mark") +
-        '<h2 class="t5 b" style="margin:12px 0 0">찾는 음식이 아직 없나요?</h2>' +
-        "<p>알려주시면 빨리 챙겨둘게요.<br>급하다면 수의사 선생님에게 먼저 물어봐 주세요.</p>" +
-        '<a class="btn btn-secondary" href="' + mailto("음식 추가 요청: " + q) + '" target="_blank" rel="noopener">이 음식 알려주기</a>' +
+        '<h2 class="t5 b" style="margin:12px 0 0">아직 등록되지 않은 음식이에요</h2>' +
+        "<p>추가를 요청하면 확인 후 등록해요.<br>급한 경우 수의사에게 먼저 문의해 주세요.</p>" +
+        '<a class="btn btn-secondary" href="' + mailto("음식 추가 요청: " + q) + '" target="_blank" rel="noopener">추가 요청하기</a>' +
         urgentLink() + "</div>";
     } else {
-      body = '<p class="t7 muted" style="margin:12px 4px 8px">' + list.length + "개를 찾았어요</p>" +
+      body = '<p class="t7 muted" style="margin:12px 4px 8px">' + '검색 결과 ' + list.length + "개</p>" +
         '<div class="group">' + list.map(function (f) {
           var v = foodVerdict(f, p);
           return '<a class="g-row link tall" href="#/food/' + f.id + '"><span class="g-name">' + esc(f.name) +
@@ -425,7 +425,7 @@
         out += row("하루 최대", esc(a.raw));
       }
       if (state.prep) out += textRow("이렇게 주세요", esc(state.prep));
-      out += textRow("처음이라면", "절반만 주고, 다음 날 응가 상태를 살펴봐 주세요.<br>이상하면 바로 멈춰 주세요.");
+      out += textRow("처음 줄 때", "절반만 주고 다음 날 변 상태를 확인해 주세요.<br>이상이 있으면 바로 중단해 주세요.");
     }
     // '주지 마세요'는 줄 방법을 보여 주지 않는다(보수적 기준).
     return out;
@@ -452,7 +452,7 @@
       why = c.subject.replace("약한", "약하면") + " " + c.reason + " 주지 않는 게 안전해요.";
     } else {
       why = (SUMMARY[food.name] && state === order[0] && v !== "cond") ? SUMMARY[food.name] : (state.caution || "");
-      if (v === "no") why = (why ? why.replace(/\.?$/, ".") + " " : "") + "아이 손이 닿지 않는 곳에 두어 주세요.";
+      if (v === "no") why = (why ? why.replace(/\.?$/, ".") + " " : "") + "아이가 닿지 않는 곳에 보관해 주세요.";
     }
 
     var html = '<h1 class="sr-only">' + esc(food.name) + "</h1>" +
@@ -461,9 +461,9 @@
       (why ? '<p class="v-sub">' + lines(why) + "</p>" : "") + "</div>";
 
     if (hits.length) {
-      html += '<div class="notice"><b>수의사 선생님 안내가 먼저예요</b>' +
-        esc(hits.map(function (x) { return CONDITIONS[x].subject; }).join(", ") + " " + josa(dogName(p), "이", "")) +
-        "라면 다니는 병원의 식단 안내를 먼저 따라 주세요.</div>";
+      html += '<div class="notice"><b>수의사 안내 우선</b>' +
+        esc(hits.map(function (x) { return CONDITIONS[x].label; }).join(", ")) +
+        " 질환이 있다면 다니는 병원의 식단 안내를 먼저 따라 주세요.</div>";
     }
 
     var rows = detailRows(food, state, p, pv);
@@ -480,13 +480,13 @@
 
     if (!p) {
       html += '<a class="profile-cta" href="#/start/new"><img class="face" src="assets/celine-face.png" alt="" width="36" height="36">' +
-        "<div><b>우리 아이 몸무게로 볼까요?</b><span>몸무게를 넣으면 아이에게 맞는 양만 보여 줄게요.</span></div>" +
-        '<span class="go">넣기</span></a>';
+        "<div><b>몸무게별 하루 최대량</b><span>아이 정보를 입력하면 몸무게에 맞는 양을 보여 줘요.</span></div>" +
+        '<span class="go">입력하기</span></a>';
     }
 
     html += v === "no"
-      ? '<a class="btn btn-danger pill-btn" href="#/ate/' + food.id + '">이미 먹었어요</a>'
-      : '<a class="btn btn-primary pill-btn" href="#/home">다른 음식 찾아보기</a>';
+      ? '<a class="btn btn-danger pill-btn" href="#/ate/' + food.id + '">먹었을 때 대처법</a>'
+      : '<a class="btn btn-primary pill-btn" href="#/home">다른 음식 검색</a>';
 
     var srcs = [];
     food.states.forEach(function (s) { s.sources.forEach(function (x) { if (srcs.indexOf(x) < 0) srcs.push(x); }); });
@@ -496,8 +496,8 @@
         var url = SOURCES[key];
         return url ? '<a href="' + url + '" target="_blank" rel="noopener">' + esc(s) + "</a>" : esc(s);
       }).join(", ") + " · " + esc(DATA.reviewedAt.replace(/-/g, ".")) + " 검토<br>" +
-      "자료가 엇갈리면 더 조심스러운 쪽으로 정했어요. 양은 넘지 않아야 할 하루 최대치예요.<br>" +
-      '<a class="report" href="' + mailto("정보 확인 요청: " + food.name + " · " + state.state) + '" target="_blank" rel="noopener">정보가 이상해요 ›</a></p>';
+      "자료가 서로 다르면 더 보수적인 기준을 적용했어요. 양은 넘지 않아야 할 하루 최대치예요.<br>" +
+      '<a class="report" href="' + mailto("정보 확인 요청: " + food.name + " · " + state.state) + '" target="_blank" rel="noopener">정보 오류 신고 ›</a></p>';
 
     render(html, { back: true, title: food.name });
   }
@@ -508,20 +508,20 @@
     track("ate_view", { food: food ? food.id : "" });
     render(
       '<section class="stage no">' + (food ? '<span class="stage-food">' + esc(food.name) + "</span>" : "") + stageArt("ate") + "</section>" +
-      '<div class="verdict-text"><h1 class="v-title ink">많이 놀랐죠</h1>' +
-        '<p class="v-sub">지금 괜찮아 보여도 <b>바로 동물병원에 연락해 주세요.</b><br>증상이 늦게 나타나는 음식이 많아요.</p></div>' +
+      '<div class="verdict-text"><h1 class="v-title ink">먹었을 때 대처법</h1>' +
+        '<p class="v-sub">증상이 없어도 <b>바로 동물병원에 연락해 주세요.</b><br>증상이 늦게 나타나는 음식이 많아요.</p></div>' +
       '<a class="btn btn-danger pill-btn" href="' + VET_SEARCH_URL + '" target="_blank" rel="noopener">가까운 24시 동물병원 찾기</a>' +
-      '<h2 class="section-title small">전화하기 전에 확인해 두기</h2>' +
+      '<h2 class="section-title small">병원에 알릴 내용</h2>' +
       '<div class="group memo">' +
-        ["무엇을 먹었는지 (포장지가 있으면 챙기기)", "얼마나 먹었는지", "언제 먹었는지", "아이 몸무게"].map(function (t, i) {
+        ["먹은 음식 (포장지가 있으면 함께 준비)", "먹은 양", "먹은 시각", "아이 몸무게"].map(function (t, i) {
           return '<label class="g-row"><input type="checkbox" id="m' + i + '"> ' + esc(t) + "</label>";
         }).join("") + "</div>" +
-      '<h2 class="section-title small">병원 안내 전에는 하지 말아 주세요</h2>' +
+      '<h2 class="section-title small">병원 안내 전 금지 사항</h2>' +
       '<div class="group">' +
-        ["억지로 토하게 하기 (소금물, 손가락 넣기)", "우유나 다른 음식 먹이기", "사람 약 먹이기"].map(function (t) {
+        ["억지로 토하게 하기 (소금물, 손가락 넣기)", "우유나 다른 음식 먹이기", "사람이 먹는 약 먹이기"].map(function (t) {
           return '<div class="g-row"><span class="g-name normal">' + esc(t) + "</span></div>";
         }).join("") + "</div>" +
-      '<p class="ev">이 화면은 아이 상태를 판단하지 않아요.<br>아이 상태는 꼭 수의사 선생님이 확인해 주세요.</p>',
+      '<p class="ev">이 화면은 아이 상태를 판단하지 않아요.<br>상태 판단은 수의사에게 받아 주세요.</p>',
       { back: true, title: "먹었을 때" }
     );
   }
@@ -558,7 +558,7 @@
     if (top === "ate") return viewAte(parts[1]);
     if (top === "terms" || top === "privacy") return viewDoc(top);
     if (top === "start") return viewStart(parts[1]);
-    // 첫 방문: 시작 화면. 저장된 정보가 있으면 '다시 오셨네요'로 확인.
+    // 첫 방문: 시작 화면. 저장된 정보가 있으면 '저장된 아이 정보'로 확인.
     if (!top || (!confirmedThisVisit && !sessionBrowse() && (top === "home"))) return viewStart();
     if (top === "home") return viewHome();
     if (top === "search") return viewSearch(query);
