@@ -23,10 +23,10 @@
 
   var VERDICT = {
     ok:    { label: "괜찮아요",          lead: "간식으로 좋아요" },
-    cond:  { label: "이렇게 주면 돼요",  lead: "이렇게만 주세요" },
+    cond:  { label: "주의가 필요해요",  lead: "주의가 필요해요" },
     warn:  { label: "주지 마세요",       lead: "주지 마세요" },
     no:    { label: "절대 안 돼요",      lead: "조금만 먹어도 위험해요" },
-    mixed: { label: "상태별로 달라요",  lead: "" }
+    mixed: { label: "부위·조리별로 달라요",  lead: "" }
   };
   var RANK = { no: 0, warn: 1, mixed: 2, cond: 3, ok: 4 };
   var CATEGORY = { veg: "채소", fruit: "과일", meat: "고기·내장", sea: "해산물", dairy: "달걀·유제품", grain: "밥·빵", etc: "간식·기타" };
@@ -490,7 +490,7 @@
     if (rows) html += '<div class="group">' + rows + "</div>";
 
     if (food.states.length > 1) {
-      html += '<h2 class="section-title small">다른 상태</h2><div class="group">' +
+      html += '<h2 class="section-title small">다른 부위·조리</h2><div class="group">' +
         food.states.map(function (s, i) {
           if (s === state) return "";
           var spv = personalize(food, s, p);
