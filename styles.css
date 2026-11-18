@@ -338,3 +338,10 @@ html.in-toss .top:empty { display:none; }
 .consent { margin:var(--space-3) 0 0; text-align:center; font-size:12px; line-height:18px; color:var(--grey-700); }
 .consent a, .disclaimer a { color:inherit; font-weight:700; }
 .disclaimer a { display:inline-block; margin-top:6px; min-height:24px; }
+
+/* 건강 상태: 선택 표시, 기타 직접 입력 */
+.label .opt { font-weight:400; color:var(--grey-700); }
+.other-wrap { margin-top:var(--space-3); }
+.other-wrap .hint { margin:6px 2px 0; font-size:13px; line-height:19.5px; color:var(--grey-700); }
+.label .req { color:var(--verdict-no); font-weight:700; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }

@@ -96,7 +96,8 @@
     if (p.weight) bits.push(p.weight + "kg");
     else if (p.size) bits.push(BANDS[p.size].label);
     var cs = (p.conditions || []).map(function (c) { return CONDITIONS[c].label; });
-    bits.push(cs.length ? cs.join("·") + " 주의" : "아픈 곳 없음");
+    if (p.otherCondition) cs.push(p.otherCondition);
+    if (cs.length) bits.push(cs.join("·") + " 주의");
     return bits.join(" · ");
   }
 
@@ -244,8 +245,8 @@
     var saved = loadProfile();
     if (mode !== "edit" && mode !== "new" && saved) return viewWelcomeBack(saved);
     draft = mode === "edit" && saved
-      ? { name: saved.name || "", weight: saved.weight || "", size: saved.size || null, conditions: (saved.conditions || []).slice(), unknown: !saved.weight && !!saved.size }
-      : { name: "", weight: "", size: null, conditions: [], unknown: false };
+      ? { name: saved.name || "", weight: saved.weight || "", size: saved.size || null, conditions: (saved.conditions || []).slice(), unknown: !saved.weight && !!saved.size, other: !!saved.otherCondition, otherText: saved.otherCondition || "" }
+      : { name: "", weight: "", size: null, conditions: [], unknown: false, other: false, otherText: "" };
     drawStartForm(mode === "edit");
   }
 
@@ -261,7 +262,11 @@
         '<button type="button" class="toggle-link" data-act="weight-unknown">크기로 선택</button>';
     var condChips = ["kidney", "pancreas", "thyroid"].map(function (c) {
       return '<button type="button" class="chip" data-cond="' + c + '" aria-pressed="' + (d.conditions.indexOf(c) >= 0) + '">' + CONDITIONS[c].label + "</button>";
-    }).join("") + '<button type="button" class="chip" data-cond="none" aria-pressed="' + (d.conditions.length === 0 && d.touchedCond ? "true" : "false") + '">해당 없음</button>';
+    }).join("") + '<button type="button" class="chip" data-cond="other" aria-pressed="' + !!d.other + '" aria-controls="other-wrap">기타</button>';
+    // '기타'를 고르면 질환 이름을 직접 적는다. 판정에는 아직 반영하지 않고, 요청 수를 보고 지원 질환을 늘린다.
+    var otherField = '<div class="other-wrap" id="other-wrap"' + (d.other ? "" : " hidden") + '>' +
+      '<label class="input"><input id="f-other" maxlength="20" autocomplete="off" placeholder="질환 이름 (예: 심장, 관절)" value="' + esc(d.otherText) + '" aria-label="기타 질환 이름"></label>' +
+      '<p class="hint">아직 판정에 반영하지 않아요. 요청이 많은 질환부터 순서대로 지원할 예정이에요.</p></div>';
 
     render(
       '<section class="start-hero hero-center">' +
@@ -270,11 +275,11 @@
         '<p class="t6 muted">입력한 몸무게로 하루 최대량을 계산해요.<br>정보는 이 기기에만 저장돼요.</p>' +
       "</section>" + urgentLink() +
       '<form id="start-form" novalidate>' +
-        '<div class="field"><label class="label" for="f-name">아이 이름</label>' +
+        '<div class="field"><label class="label" for="f-name">아이 이름 <span class="req" aria-hidden="true">*</span><span class="sr-only">(필수)</span></label>' +
           '<div class="input"><input id="f-name" maxlength="10" autocomplete="off" placeholder="예: 메리" value="' + esc(d.name) + '"></div></div>' +
-        '<div class="field"><span class="label">몸무게</span>' + weightField + "</div>" +
-        '<div class="field"><span class="label">건강 상태</span><span class="hint">해당하는 항목을 모두 골라 주세요. 고른 항목에 맞춰 더 엄격한 기준을 적용해요.</span>' +
-          '<div class="chips" role="group" aria-label="아픈 곳">' + condChips + "</div></div>" +
+        '<div class="field"><span class="label">몸무게 <span class="req" aria-hidden="true">*</span><span class="sr-only">(필수)</span></span>' + weightField + "</div>" +
+        '<div class="field"><span class="label">건강 상태 <span class="opt">(선택)</span></span><span class="hint">해당하는 항목을 모두 골라 주세요. 고른 항목은 더 엄격한 기준으로 판정해요.</span>' +
+          '<div class="chips" role="group" aria-label="건강 상태">' + condChips + "</div>" + otherField + "</div>" +
         '<div class="actions">' +
           '<button class="btn btn-primary" type="submit" id="start-go">' + (editing ? "저장하기" : "시작하기") + "</button>" +
           (editing
@@ -297,7 +302,9 @@
   function validateStart() {
     var btn = document.getElementById("start-go");
     if (!btn) return;
-    var ok = draft.unknown ? !!draft.size : !!readWeight();
+    var nameEl = document.getElementById("f-name");
+    var hasName = !!(nameEl && nameEl.value.trim());
+    var ok = hasName && (draft.unknown ? !!draft.size : !!readWeight());
     btn.disabled = !ok;
   }
 
@@ -600,14 +607,16 @@
     }
     if (el.dataset.cond) {
       var c = el.dataset.cond;
-      draft.touchedCond = true;
-      if (c === "none") draft.conditions = [];
-      else {
+      if (c === "other") {
+        draft.other = !draft.other;
+        var wrap = document.getElementById("other-wrap");
+        if (wrap) { wrap.hidden = !draft.other; if (draft.other) document.getElementById("f-other").focus(); }
+      } else {
         var i = draft.conditions.indexOf(c);
         if (i >= 0) draft.conditions.splice(i, 1); else draft.conditions.push(c);
       }
       document.querySelectorAll("[data-cond]").forEach(function (b) {
-        var on = b.dataset.cond === "none" ? draft.conditions.length === 0 : draft.conditions.indexOf(b.dataset.cond) >= 0;
+        var on = b.dataset.cond === "other" ? draft.other : draft.conditions.indexOf(b.dataset.cond) >= 0;
         b.setAttribute("aria-pressed", String(on));
       });
       return;
@@ -636,7 +645,7 @@
   });
 
   document.addEventListener("input", function (e) {
-    if (e.target.id === "f-weight") validateStart();
+    if (e.target.id === "f-weight" || e.target.id === "f-name") validateStart();
   });
 
   document.addEventListener("submit", function (e) {
@@ -649,11 +658,15 @@
     }
     if (e.target.id === "start-form") {
       var name = document.getElementById("f-name").value.trim().slice(0, 10);
+      if (!name) { document.getElementById("f-name").focus(); return; }
       var p = { name: name || "", conditions: draft.conditions.slice(), savedAt: new Date().toISOString() };
       if (draft.unknown) { if (!draft.size) return; p.size = draft.size; }
       else { var w = readWeight(); if (!w) return; p.weight = w; }
+      var otherEl = document.getElementById("f-other");
+      var otherText = draft.other && otherEl ? otherEl.value.trim().slice(0, 20) : "";
+      if (otherText) p.otherCondition = otherText;
       saveProfile(p);
-      track("profile_saved", { conditions: p.conditions.length, by_size: !!p.size });
+      track("profile_saved", { conditions: p.conditions.length, by_size: !!p.size, other_condition: otherText });
       confirmedThisVisit = true;
       browsing = false;
       toast(dogName(p) + " 정보를 저장했어요");
